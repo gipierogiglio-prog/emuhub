@@ -11,8 +11,8 @@ data class R2Config(
     val region: String = "auto",
     val accessKey: String = "34351de9bfa1e2b45be740ee5129c448",
     val secretKey: String = "d89a1c85d54e06f3b290f4f4743440c9f014ba933a3e170a8d40c3aa6af8d0da",
-    val gamesPrefix: String = "PC/EmuHub/roms/",
-    val cacheDir: String = "emuhub_cache",
+    val gamesPrefix: String = "PC/GPBOXPC/gpbox/roms/",
+    val cacheDir: String = "gpbox_cache",
     /** Tamanho máximo do cache local de downloads, em MB. */
     val maxCacheMB: Long = 2048,
 )

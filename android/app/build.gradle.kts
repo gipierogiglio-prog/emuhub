@@ -26,9 +26,9 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file("../keystore.jks")
-            storePassword = "EmuHub2026!"
-            keyAlias = "emuhub"
-            keyPassword = "EmuHub2026!"
+            storePassword = "Gpbox2026!"
+            keyAlias = "gpbox"
+            keyPassword = "Gpbox2026!"
         }
     }
 
