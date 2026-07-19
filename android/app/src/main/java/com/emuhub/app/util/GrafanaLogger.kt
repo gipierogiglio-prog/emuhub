@@ -16,7 +16,7 @@ import java.net.URL
 object GrafanaLogger {
 
     private const val TAG = "GrafanaLogger"
-    private const val DEFAULT_ENDPOINT = "https://grafana.devgiglio.uk/api/v1/logs"
+    private const val DEFAULT_ENDPOINT = "https://logs.devgiglio.uk/api/v1/logs"
     private const val DEFAULT_TOKEN = "gpbox2026"
 
     private var endpoint: String = DEFAULT_ENDPOINT
