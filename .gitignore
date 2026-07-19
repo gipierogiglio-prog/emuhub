@@ -1,0 +1,44 @@
+# Android
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+android/build
+android/app/build
+android/app/.cxx
+android/.externalNativeBuild
+*.apk
+*.aab
+android/app/output-metadata.json
+keystore.jks
+*.jks
+
+# Large ROM/ISO files
+*.iso
+*.zip
+*.chd
+*.cso
+*.rvz
+*.wbfs
+*.7z
+*.gz
+*.gba
+*.nds
+*.3ds
+*.nes
+*.smc
+*.sfc
+*.md
+
+# ROM data
+PC/
+
+# Separate projects (old GPBOX ecosystem)
+manager/
+play-source/
+
+# Misc project files
+__pycache__
+*.pyc
+node_modules/

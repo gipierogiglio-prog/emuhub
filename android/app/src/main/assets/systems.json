@@ -1,0 +1,634 @@
+{
+  "systems": [
+    {
+      "id": "snes",
+      "name": "Super Nintendo",
+      "shortName": "SNES",
+      "folder": "snes",
+      "extensions": [
+        ".sfc",
+        ".smc",
+        ".zip",
+        ".7z"
+      ],
+      "color": "#7B4FA3",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "snes9x"
+        },
+        {
+          "ref": "snes9x_ex"
+        }
+      ]
+    },
+    {
+      "id": "nes",
+      "name": "Nintendo Entertainment System",
+      "shortName": "NES",
+      "folder": "nes",
+      "extensions": [
+        ".nes",
+        ".fds",
+        ".zip",
+        ".7z"
+      ],
+      "color": "#C22F2F",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "fceumm"
+        }
+      ]
+    },
+    {
+      "id": "megadrive",
+      "name": "Mega Drive",
+      "shortName": "MD",
+      "folder": "megadrive",
+      "extensions": [
+        ".md",
+        ".gen",
+        ".smd",
+        ".bin",
+        ".zip",
+        ".7z"
+      ],
+      "color": "#1B4DB1",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "genesis_plus_gx"
+        }
+      ]
+    },
+    {
+      "id": "mastersystem",
+      "name": "Master System",
+      "shortName": "SMS",
+      "folder": "mastersystem",
+      "extensions": [
+        ".sms",
+        ".zip",
+        ".7z"
+      ],
+      "color": "#D42B2B",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "genesis_plus_gx"
+        }
+      ]
+    },
+    {
+      "id": "gamegear",
+      "name": "Game Gear",
+      "shortName": "GG",
+      "folder": "gamegear",
+      "extensions": [
+        ".gg",
+        ".zip",
+        ".7z"
+      ],
+      "color": "#2E2E86",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "genesis_plus_gx"
+        }
+      ]
+    },
+    {
+      "id": "segacd",
+      "name": "Sega CD",
+      "shortName": "SCD",
+      "folder": "segacd",
+      "extensions": [
+        ".cue",
+        ".chd",
+        ".iso",
+        ".m3u"
+      ],
+      "color": "#8C1D1D",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "genesis_plus_gx"
+        }
+      ]
+    },
+    {
+      "id": "sega32x",
+      "name": "Sega 32X",
+      "shortName": "32X",
+      "folder": "sega32x",
+      "extensions": [
+        ".32x",
+        ".bin",
+        ".zip",
+        ".7z"
+      ],
+      "color": "#B33B3B",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "picodrive"
+        }
+      ]
+    },
+    {
+      "id": "psx",
+      "name": "PlayStation",
+      "shortName": "PS1",
+      "folder": "psx",
+      "extensions": [
+        ".cue",
+        ".chd",
+        ".pbp",
+        ".iso",
+        ".m3u",
+        ".img"
+      ],
+      "color": "#5A5A5A",
+      "emulators": [
+        {
+          "ref": "duckstation"
+        },
+        {
+          "ref": "retroarch",
+          "core": "swanstation"
+        }
+      ]
+    },
+    {
+      "id": "ps2",
+      "name": "PlayStation 2",
+      "shortName": "PS2",
+      "folder": "ps2",
+      "extensions": [
+        ".iso",
+        ".chd",
+        ".cso",
+        ".gz"
+      ],
+      "color": "#1F3C88",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "pcee2"
+        },
+        {
+          "ref": "retroarch",
+          "core": "play"
+        },
+        {
+          "ref": "aethersx2"
+        }
+      ]
+    },
+    {
+      "id": "psp",
+      "name": "PlayStation Portable",
+      "shortName": "PSP",
+      "folder": "psp",
+      "extensions": [
+        ".iso",
+        ".cso",
+        ".pbp",
+        ".chd"
+      ],
+      "color": "#2D2D2D",
+      "emulators": [
+        {
+          "ref": "ppsspp"
+        },
+        {
+          "ref": "retroarch",
+          "core": "ppsspp"
+        }
+      ]
+    },
+    {
+      "id": "n64",
+      "name": "Nintendo 64",
+      "shortName": "N64",
+      "folder": "n64",
+      "extensions": [
+        ".n64",
+        ".z64",
+        ".v64",
+        ".zip",
+        ".7z"
+      ],
+      "color": "#2E8B57",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "mupen64plus_next"
+        },
+        {
+          "ref": "mupen64fz"
+        }
+      ]
+    },
+    {
+      "id": "gba",
+      "name": "Game Boy Advance",
+      "shortName": "GBA",
+      "folder": "gba",
+      "extensions": [
+        ".gba",
+        ".zip",
+        ".7z"
+      ],
+      "color": "#4B3F9E",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "mgba"
+        }
+      ]
+    },
+    {
+      "id": "gb",
+      "name": "Game Boy",
+      "shortName": "GB",
+      "folder": "gb",
+      "extensions": [
+        ".gb",
+        ".zip",
+        ".7z"
+      ],
+      "color": "#6B7A3A",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "gambatte"
+        }
+      ]
+    },
+    {
+      "id": "gbc",
+      "name": "Game Boy Color",
+      "shortName": "GBC",
+      "folder": "gbc",
+      "extensions": [
+        ".gbc",
+        ".zip",
+        ".7z"
+      ],
+      "color": "#8E44AD",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "gambatte"
+        }
+      ]
+    },
+    {
+      "id": "nds",
+      "name": "Nintendo DS",
+      "shortName": "NDS",
+      "folder": "nds",
+      "extensions": [
+        ".nds",
+        ".zip",
+        ".7z"
+      ],
+      "color": "#3A6EA5",
+      "emulators": [
+        {
+          "ref": "drastic"
+        },
+        {
+          "ref": "melonds"
+        },
+        {
+          "ref": "retroarch",
+          "core": "melonds"
+        }
+      ]
+    },
+    {
+      "id": "3ds",
+      "name": "Nintendo 3DS",
+      "shortName": "3DS",
+      "folder": "3ds",
+      "extensions": [
+        ".3ds",
+        ".cci",
+        ".cxi",
+        ".app"
+      ],
+      "color": "#C0392B",
+      "emulators": [
+        {
+          "ref": "citra"
+        },
+        {
+          "ref": "panda3ds"
+        }
+      ]
+    },
+    {
+      "id": "dreamcast",
+      "name": "Dreamcast",
+      "shortName": "DC",
+      "folder": "dreamcast",
+      "extensions": [
+        ".cdi",
+        ".gdi",
+        ".chd",
+        ".cue"
+      ],
+      "color": "#E67E22",
+      "emulators": [
+        {
+          "ref": "redream"
+        },
+        {
+          "ref": "flycast"
+        },
+        {
+          "ref": "retroarch",
+          "core": "flycast"
+        }
+      ]
+    },
+    {
+      "id": "gamecube",
+      "name": "GameCube",
+      "shortName": "GC",
+      "folder": "gamecube",
+      "extensions": [
+        ".iso",
+        ".gcm",
+        ".rvz",
+        ".ciso"
+      ],
+      "color": "#5E3B8E",
+      "emulators": [
+        {
+          "ref": "dolphin"
+        }
+      ]
+    },
+    {
+      "id": "wii",
+      "name": "Nintendo Wii",
+      "shortName": "Wii",
+      "folder": "wii",
+      "extensions": [
+        ".iso",
+        ".wbfs",
+        ".rvz"
+      ],
+      "color": "#3498DB",
+      "emulators": [
+        {
+          "ref": "dolphin"
+        }
+      ]
+    },
+    {
+      "id": "arcade",
+      "name": "Arcade",
+      "shortName": "ARC",
+      "folder": "arcade",
+      "extensions": [
+        ".zip",
+        ".chd"
+      ],
+      "color": "#D4A017",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "fbneo"
+        }
+      ]
+    },
+    {
+      "id": "mame",
+      "name": "MAME",
+      "shortName": "MAME",
+      "folder": "mame",
+      "extensions": [
+        ".zip",
+        ".chd"
+      ],
+      "color": "#16A085",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "mame2003_plus"
+        }
+      ]
+    },
+    {
+      "id": "neogeo",
+      "name": "Neo Geo",
+      "shortName": "NG",
+      "folder": "neogeo",
+      "extensions": [
+        ".zip",
+        ".7z"
+      ],
+      "color": "#B8860B",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "fbneo"
+        }
+      ]
+    },
+    {
+      "id": "atari2600",
+      "name": "Atari 2600",
+      "shortName": "2600",
+      "folder": "atari2600",
+      "extensions": [
+        ".a26",
+        ".bin",
+        ".zip",
+        ".7z"
+      ],
+      "color": "#7A4A21",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "stella"
+        }
+      ]
+    },
+    {
+      "id": "pcengine",
+      "name": "PC Engine",
+      "shortName": "PCE",
+      "folder": "pcengine",
+      "extensions": [
+        ".pce",
+        ".cue",
+        ".chd",
+        ".zip"
+      ],
+      "color": "#E74C3C",
+      "emulators": [
+        {
+          "ref": "retroarch",
+          "core": "mednafen_pce_fast"
+        }
+      ]
+    }
+  ],
+  "emulators": [
+    {
+      "id": "retroarch",
+      "name": "RetroArch",
+      "packages": [
+        "com.retroarch.aarch64",
+        "com.retroarch",
+        "com.retroarch.ra32"
+      ],
+      "launch": {
+        "type": "retroarch"
+      },
+      "installUrl": "https://retroarch.com/?page=platforms"
+    },
+    {
+      "id": "duckstation",
+      "name": "DuckStation",
+      "packages": [
+        "com.github.stenzek.duckstation"
+      ],
+      "launch": {
+        "type": "component_extra",
+        "component": "com.github.stenzek.duckstation.EmulationActivity",
+        "pathExtra": "bootPath",
+        "pathKind": "file"
+      }
+    },
+    {
+      "id": "aethersx2",
+      "name": "AetherSX2 / NetherSX2",
+      "packages": [
+        "xyz.aethersx2.android"
+      ],
+      "launch": {
+        "type": "component_extra",
+        "component": "xyz.aethersx2.android.EmulationActivity",
+        "pathExtra": "bootPath",
+        "pathKind": "file"
+      },
+      "installUrl": "https://github.com/Trixarian/NetherSX2-patch/releases"
+    },
+    {
+      "id": "ppsspp",
+      "name": "PPSSPP",
+      "packages": [
+        "org.ppsspp.ppsspp",
+        "org.ppsspp.ppssppgold"
+      ],
+      "launch": {
+        "type": "view_uri"
+      }
+    },
+    {
+      "id": "dolphin",
+      "name": "Dolphin",
+      "packages": [
+        "org.dolphinemu.dolphinemu",
+        "org.mm.j"
+      ],
+      "launch": {
+        "type": "component_extra",
+        "component": "org.dolphinemu.dolphinemu.ui.main.MainActivity",
+        "pathExtra": "AutoStartFile",
+        "pathKind": "content"
+      }
+    },
+    {
+      "id": "drastic",
+      "name": "DraStic",
+      "packages": [
+        "com.dsemu.drastic"
+      ],
+      "launch": {
+        "type": "component_extra",
+        "component": "com.dsemu.drastic.DraSticActivity",
+        "pathExtra": "GAMEPATH",
+        "pathKind": "file"
+      }
+    },
+    {
+      "id": "melonds",
+      "name": "melonDS",
+      "packages": [
+        "me.magnum.melonds"
+      ],
+      "launch": {
+        "type": "view_uri"
+      }
+    },
+    {
+      "id": "citra",
+      "name": "Citra",
+      "packages": [
+        "org.citra.citra_emu",
+        "org.citra.citra_emu.canary"
+      ],
+      "launch": {
+        "type": "view_uri"
+      }
+    },
+    {
+      "id": "redream",
+      "name": "Redream",
+      "packages": [
+        "io.recompiled.redream"
+      ],
+      "launch": {
+        "type": "view_uri"
+      }
+    },
+    {
+      "id": "flycast",
+      "name": "Flycast",
+      "packages": [
+        "com.flycast.emulator"
+      ],
+      "launch": {
+        "type": "view_uri"
+      }
+    },
+    {
+      "id": "mupen64fz",
+      "name": "Mupen64Plus FZ",
+      "packages": [
+        "org.mupen64plusae.v3.fzurita"
+      ],
+      "launch": {
+        "type": "view_uri"
+      }
+    },
+    {
+      "id": "snes9x_ex",
+      "name": "Snes9x EX+",
+      "packages": [
+        "com.explusalpha.Snes9xPlus"
+      ],
+      "launch": {
+        "type": "view_uri"
+      }
+    },
+    {
+      "id": "panda3ds",
+      "name": "Panda3DS",
+      "launch": {
+        "type": "view_uri"
+      },
+      "packages": [
+        "me.wheremyfood.Panda3DS"
+      ]
+    }
+  ]
+}

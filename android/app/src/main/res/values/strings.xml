@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EmuHub</string>
+    <string name="slogan">Seu hub de emulação</string>
+
+    <!-- Onboarding -->
+    <string name="bem_vindo">Bem-vindo ao EmuHub</string>
+    <string name="onboarding_intro">Organize seus jogos e emuladores em um só lugar. Vamos configurar em 3 passos.</string>
+    <string name="passo_permissao_titulo">1. Permissão de arquivos</string>
+    <string name="passo_permissao_texto">O EmuHub precisa acessar todos os arquivos para encontrar suas ROMs e enviá-las aos emuladores.</string>
+    <string name="conceder_permissao">Conceder permissão</string>
+    <string name="permissao_concedida">Permissão concedida ✓</string>
+    <string name="passo_pasta_titulo">2. Pasta de jogos</string>
+    <string name="passo_pasta_texto">Escolha a pasta raiz onde ficam (ou ficarão) seus jogos. O EmuHub usa a estrutura EmuHub/roms/&lt;sistema&gt;.</string>
+    <string name="escolher_pasta">Escolher pasta</string>
+    <string name="usar_pasta_padrao">Usar pasta padrão (armazenamento interno)</string>
+    <string name="criar_estrutura">Criar estrutura de pastas dos sistemas</string>
+    <string name="passo_scan_titulo">3. Buscar jogos</string>
+    <string name="escanear">Buscar jogos</string>
+    <string name="escaneando">Buscando jogos…</string>
+    <string name="scan_resultado">%1$d jogos encontrados em %2$d sistemas</string>
+    <string name="comecar">Começar</string>
+
+    <!-- Home -->
+    <string name="sistemas">Sistemas</string>
+    <string name="recentes">Recentes</string>
+    <string name="favoritos">Favoritos</string>
+    <string name="todos_os_jogos">Todos os jogos</string>
+    <string name="jogos_count">%1$d jogos</string>
+    <string name="configuracoes">Configurações</string>
+    <string name="nenhum_sistema">Nenhum jogo encontrado. Coloque suas ROMs em EmuHub/roms/&lt;sistema&gt; e faça uma nova busca em Configurações.</string>
+
+    <!-- Lista de jogos -->
+    <string name="nenhum_jogo_sistema">Nenhum jogo encontrado em %1$s</string>
+    <string name="jogar">Jogar</string>
+
+    <!-- Launcher -->
+    <string name="emulador_nao_instalado">Emulador não instalado</string>
+    <string name="emulador_nao_instalado_msg">Para jogar %1$s você precisa do emulador %2$s. Deseja instalá-lo?</string>
+    <string name="instalar">Instalar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="erro_ao_lancar">Não foi possível iniciar o emulador. Verifique se ele está atualizado.</string>
+    <string name="dica_core_retroarch">Se o jogo não abrir, abra o RetroArch e baixe o core \"%1$s\" em Carregar Core → Baixar um Core.</string>
+    <string name="ok">OK</string>
+
+    <!-- Configurações -->
+    <string name="pasta_de_roms">Pasta de jogos</string>
+    <string name="reescanear">Buscar jogos novamente</string>
+    <string name="controle">Controle</string>
+    <string name="controle_info">Conecte um controle Bluetooth ou USB</string>
+    <string name="controle_nenhum">Nenhum controle detectado</string>
+    <string name="controle_conectado">Conectado: %1$s</string>
+    <string name="ocultar_touch_overlay">Ocultar touch overlay automaticamente</string>
+    <string name="ocultar_touch_overlay_desc">Esconde os botões de toque durante o jogo quando um controle está conectado</string>
+    <string name="sobre">Sobre</string>
+    <string name="sobre_texto">EmuHub 1.0 — seu hub de emulação. Os jogos são executados pelos emuladores instalados no aparelho.</string>
+    <string name="voltar">Voltar</string>
+
+    <!-- R2 (jogos na nuvem) -->
+    <string name="passo_r2_titulo">4. Jogos na nuvem (opcional)</string>
+    <string name="passo_r2_texto">Conecte ao servidor EmuHub para ver o catálogo de jogos na nuvem. O download acontece automaticamente ao tocar no jogo.</string>
+    <string name="conectar_r2">Conectar e buscar na nuvem</string>
+    <string name="usar_apenas_r2">Usar apenas a nuvem</string>
+    <string name="r2_scan_resultado">%1$d jogos encontrados na nuvem</string>
+    <string name="r2_conectando">Conectando à nuvem…</string>
+    <string name="r2_erro">Falha ao conectar à nuvem: %1$s</string>
+    <string name="armazenamento_remoto">Jogos na nuvem (R2)</string>
+    <string name="r2_status_conectado">Conectado ✓</string>
+    <string name="r2_status_desconectado">Desconectado</string>
+    <string name="reescanear_r2">Buscar jogos na nuvem novamente</string>
+    <string name="limpar_cache">Limpar cache de downloads</string>
+    <string name="cache_usado">Espaço usado pelo cache: %1$s</string>
+    <string name="cache_limpo">Cache limpo ✓</string>
+    <string name="baixando_jogo">Baixando %1$s…</string>
+    <string name="instala_emulador">Instalando %1$s…</string>
+    <string name="instalacao_concluida">%1$s instalado!</string>
+    <string name="instalacao_voltar">APK baixado! Toque em \"Instalar\" na tela que abriu, depois volte e toque no jogo novamente.</string>
+    <string name="falha_instalacao">Falha ao instalar %1$s</string>
+    <string name="r2_ultima_sync">Última sincronização: %1$s</string>
+    <string name="r2_nunca_sincronizado">Nunca sincronizado</string>
+</resources>

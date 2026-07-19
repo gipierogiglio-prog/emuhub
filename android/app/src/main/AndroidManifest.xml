@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Necessário para buscar/baixar jogos do Cloudflare R2 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Necessário para instalar APKs baixados do R2 -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- Visibilidade de pacotes (Android 11+) para detectar emuladores instalados -->
+    <queries>
+        <package android:name="com.retroarch" />
+        <package android:name="com.retroarch.aarch64" />
+        <package android:name="com.retroarch.ra32" />
+        <package android:name="org.ppsspp.ppsspp" />
+        <package android:name="org.ppsspp.ppssppgold" />
+        <package android:name="org.dolphinemu.dolphinemu" />
+        <package android:name="org.mm.j" />
+        <package android:name="com.github.stenzek.duckstation" />
+        <package android:name="xyz.aethersx2.android" />
+        <package android:name="org.citra.citra_emu" />
+        <package android:name="org.citra.citra_emu.canary" />
+        <package android:name="com.dsemu.drastic" />
+        <package android:name="me.magnum.melonds" />
+        <package android:name="io.recompiled.redream" />
+        <package android:name="com.flycast.emulator" />
+        <package android:name="org.mupen64plusae.v3.fzurita" />
+        <package android:name="com.explusalpha.Snes9xPlus" />
+    </queries>
+
+    <application
+        android:name=".EmuHubApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Emuhub">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:theme="@style/Theme.Emuhub">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".EmulatorActivity"
+            android:exported="false"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+
+</manifest>
