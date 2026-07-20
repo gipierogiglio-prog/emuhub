@@ -1,0 +1,100 @@
+name: Build APKs
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'android/**'
+      - '.github/workflows/build.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'android/**'
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/.gradle
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle.kts', 'android/gradle/libs.versions.toml', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Decode keystore
+        run: |
+          if [ -n "${{ secrets.EMUHUB_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.EMUHUB_KEYSTORE_BASE64 }}" | base64 -d > ../keystore.jks
+          fi
+
+      - name: Build release APKs (split by ABI)
+        run: ./gradlew assembleRelease
+        env:
+          EMUHUB_KEYSTORE_PATH: ${{ github.workspace }}/keystore.jks
+          EMUHUB_STORE_PASSWORD: ${{ secrets.EMUHUB_STORE_PASSWORD || 'Gpbox2026!' }}
+          EMUHUB_KEY_ALIAS: ${{ secrets.EMUHUB_KEY_ALIAS || 'gpbox' }}
+          EMUHUB_KEY_PASSWORD: ${{ secrets.EMUHUB_KEY_PASSWORD || 'Gpbox2026!' }}
+
+      - name: List APKs
+        run: |
+          echo "=== APKs gerados ==="
+          ls -lh app/build/outputs/apk/release/*.apk 2>/dev/null || echo "Nenhum APK encontrado"
+
+      - name: Upload APKs (arm64-v8a)
+        uses: actions/upload-artifact@v4
+        with:
+          name: emuhub-arm64-v8a-release
+          path: android/app/build/outputs/apk/release/*arm64*v8a*.apk
+          if-no-files-found: warn
+
+      - name: Upload APKs (armeabi-v7a)
+        uses: actions/upload-artifact@v4
+        with:
+          name: emuhub-armeabi-v7a-release
+          path: android/app/build/outputs/apk/release/*armeabi*v7a*.apk
+          if-no-files-found: warn
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            emuhub-arm64-v8a-release/*.apk
+            emuhub-armeabi-v7a-release/*.apk
+          generate_release_notes: true
