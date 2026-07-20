@@ -19,6 +19,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: release
     defaults:
       run:
         working-directory: android
