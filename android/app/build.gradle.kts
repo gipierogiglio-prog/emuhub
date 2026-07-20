@@ -16,19 +16,26 @@ android {
         targetSdk = 34
         versionCode = 52
         versionName = "1.2"
+    }
 
-        ndk {
-            abiFilters += "arm64-v8a"
-            abiFilters += "armeabi-v7a"
+    // Gera APKs separados por arquitetura em vez de um APK gigante com ambas
+    splits {
+        abi {
+            isUniversalApk = false
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a")
         }
     }
 
     signingConfigs {
         create("release") {
-            storeFile = file("../keystore.jks")
-            storePassword = "Gpbox2026!"
-            keyAlias = "gpbox"
-            keyPassword = "Gpbox2026!"
+            storeFile = file(
+                System.getenv("EMUHUB_KEYSTORE_PATH") ?: "../keystore.jks"
+            )
+            storePassword = System.getenv("EMUHUB_STORE_PASSWORD") ?: "Gpbox2026!"
+            keyAlias = System.getenv("EMUHUB_KEY_ALIAS") ?: "gpbox"
+            keyPassword = System.getenv("EMUHUB_KEY_PASSWORD") ?: "Gpbox2026!"
         }
     }
 

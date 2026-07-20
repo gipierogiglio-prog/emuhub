@@ -148,6 +148,13 @@ fun SettingsScreen(onBack: () -> Unit) {
 
         Spacer(Modifier.height(12.dp))
 
+        // Atualizações
+        Text("🔄 Atualizações", style = MaterialTheme.typography.titleMedium, color = EmuHubRed)
+        Spacer(Modifier.height(8.dp))
+        UpdateSection()
+
+        Spacer(Modifier.height(12.dp))
+
         // Logs / Telemetria
         FocusableCard(
             onClick = {
@@ -405,3 +412,101 @@ private fun connectedGamepadNames(): List<String> =
             )
         }
         .map { it.name }
+
+@Composable
+private fun UpdateSection() {
+    val container = LocalAppContainer.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    var checking by remember { mutableStateOf(false) }
+    var release by remember { mutableStateOf<com.emuhub.app.domain.GitHubRelease?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var downloading by remember { mutableStateOf(false) }
+    var downloadedFile by remember { mutableStateOf<java.io.File?>(null) }
+    var installError by remember { mutableStateOf<String?>(null) }
+
+    val updater = remember {
+        com.emuhub.app.domain.AutoUpdater(context, 52L)  // versionCode
+    }
+
+    FocusableCard(
+        onClick = {
+            if (checking || downloading) return@FocusableCard
+            scope.launch {
+                checking = true
+                error = null
+                release = null
+                downloadedFile = null
+                installError = null
+                val result = updater.checkForUpdate()
+                if (result == null && error == null) {
+                    error = "Você já está na versão mais recente"
+                }
+                release = result
+                checking = false
+            }
+        },
+        backgroundColor = EmuHubSurfaceHigh,
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            if (checking) {
+                Text("Verificando...")
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    color = EmuHubRed,
+                )
+            } else if (downloading) {
+                Text("Baixando atualização...")
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    color = EmuHubRed,
+                )
+            } else if (downloadedFile != null) {
+                Text("✅ Atualização baixada!", color = EmuHubRed)
+                Spacer(Modifier.height(4.dp))
+                FocusableCard(
+                    onClick = {
+                        if (downloadedFile != null) {
+                            val ok = updater.installApk(downloadedFile!!)
+                            if (!ok) installError = "Falha ao abrir instalador"
+                        }
+                    },
+                    backgroundColor = EmuHubRed,
+                ) {
+                    Text(
+                        "Instalar agora",
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        color = androidx.compose.ui.graphics.Color.White,
+                    )
+                }
+            } else {
+                Text(release?.let { "📦 ${it.tagName} disponível (${formatBytes2(it.apkSize)})" }
+                    ?: error ?: "Toque para verificar atualizações",
+                    color = if (release != null) EmuHubRed
+                    else if (error != null) EmuHubGray
+                    else EmuHubGray,
+                )
+                installError?.let {
+                    Text(it, color = EmuHubRed, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+    }
+
+    // Quando encontra uma release, já começa a baixar
+    LaunchedEffect(release) {
+        val rel = release ?: return@LaunchedEffect
+        downloading = true
+        val file = updater.downloadApk(rel)
+        downloadedFile = file
+        downloading = false
+    }
+}
+
+private fun formatBytes2(bytes: Long): String = when {
+    bytes >= 1024L * 1024 * 1024 -> "%.1f GB".format(bytes / (1024f * 1024f * 1024f))
+    bytes >= 1024L * 1024 -> "%.1f MB".format(bytes / (1024f * 1024f))
+    bytes >= 1024L -> "%.1f KB".format(bytes / 1024f)
+    else -> "$bytes B"
+}

@@ -3,6 +3,7 @@ package com.emuhub.app.data.r2
 import com.emuhub.app.data.catalog.SystemCatalog
 import com.emuhub.app.data.scanner.RomScanner
 import com.emuhub.app.data.scanner.ScanProgress
+import com.emuhub.app.util.EmuHubLogger
 
 /** ROM encontrada no R2 — equivalente remoto do ScannedRom, com key no lugar de File. */
 data class RemoteRom(
@@ -69,10 +70,11 @@ class R2GameFetcher(
             val objects = try {
                 client.listObjects(systemPrefix)
             } catch (e: Exception) {
-                // Sistema sem pasta no bucket ou erro pontual: segue para o próximo.
+                EmuHubLogger.e("R2GameFetcher", "listObjects falhou para $systemPrefix: ${e.message}")
                 emptyList()
             }
 
+            EmuHubLogger.i("R2GameFetcher", "$systemPrefix → ${objects.size} objetos")
             objects.forEach { obj ->
                 val fileName = obj.key.substringAfterLast('/')
                 if (fileName.isEmpty() || fileName.startsWith(".")) return@forEach
@@ -89,6 +91,7 @@ class R2GameFetcher(
                 )
             }
         }
+        EmuHubLogger.i("R2GameFetcher", "fetchGames total: ${results.size} ROMs em ${total} sistemas")
         onProgress(ScanProgress("", total, total, results.size))
         return results
     }

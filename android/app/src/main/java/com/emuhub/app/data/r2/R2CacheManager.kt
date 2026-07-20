@@ -2,6 +2,7 @@ package com.emuhub.app.data.r2
 
 import android.content.Context
 import android.os.Environment
+import android.util.Log
 import java.io.File
 
 /**
@@ -21,11 +22,24 @@ class R2CacheManager(
     val root: File = run {
         val external = Environment.getExternalStorageDirectory()
         if (external != null && Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-            File(external, "EmuHub/.${config.cacheDir}")
-        } else {
-            File(context.cacheDir, config.cacheDir)
+            val candidate = File(external, "EmuHub/.${config.cacheDir}")
+            // Verifica se consegue escrever no diretório (Android 14 scoped
+            // storage pode negar mesmo com MEDIA_MOUNTED). Se falhar, usa
+            // cacheDir interno como fallback.
+            try {
+                candidate.mkdirs()
+                if (candidate.isDirectory && candidate.canWrite()) {
+                    return@run candidate
+                }
+                Log.w(TAG, "Root externo $candidate não é writable — fallback p/ cache interno")
+            } catch (_: Exception) {
+                Log.w(TAG, "Root externo $candidate falhou — fallback p/ cache interno")
+            }
         }
+        File(context.cacheDir, config.cacheDir)
     }
+
+    private val TAG = "R2CacheManager"
 
     /** Arquivo local correspondente a uma key do R2 (espelha a hierarquia da key). */
     fun fileFor(key: String): File = File(root, sanitize(key))

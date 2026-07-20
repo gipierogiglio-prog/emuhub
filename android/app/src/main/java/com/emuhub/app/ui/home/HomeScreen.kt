@@ -1,5 +1,6 @@
 package com.emuhub.app.ui.home
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,16 +19,23 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emuhub.app.R
 import com.emuhub.app.data.db.GameEntity
+import com.emuhub.app.domain.model.LaunchResult
 import com.emuhub.app.ui.components.BoxArt
 import com.emuhub.app.ui.components.FocusableCard
 import com.emuhub.app.ui.components.parseSystemColor
@@ -43,6 +52,7 @@ import com.emuhub.app.ui.navigation.Routes
 import com.emuhub.app.ui.theme.EmuHubGray
 import com.emuhub.app.ui.theme.EmuHubRed
 import com.emuhub.app.ui.theme.EmuHubSurfaceHigh
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -57,6 +67,7 @@ fun HomeScreen(
     val countsById = counts.associate { it.systemId to it.count }
     val systemsWithGames = container.catalog.systems.filter { (countsById[it.id] ?: 0) > 0 }
     val totalGames = counts.sumOf { it.count }
+    var showHelp by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -96,6 +107,13 @@ fun HomeScreen(
                     color = EmuHubRed,
                 )
                 Spacer(Modifier.weight(1f))
+                FocusableCard(onClick = { showHelp = true }, backgroundColor = EmuHubSurfaceHigh) {
+                    Text(
+                        "?",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
                 FocusableCard(onClick = onOpenSettings, backgroundColor = EmuHubSurfaceHigh) {
                     Text(
                         stringResource(R.string.configuracoes),
@@ -190,6 +208,43 @@ fun HomeScreen(
             }
         }
     }
+
+    // Dialog de ajuda com atalhos do controle
+    if (showHelp) {
+        AlertDialog(
+            onDismissRequest = { showHelp = false },
+            title = { Text("Como usar o EmuHub", fontWeight = FontWeight.Bold) },
+            text = {
+                Column {
+                    Text("🎮 Controles:", fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text("• D-pad: navegar entre jogos")
+                    Text("• A / Enter: abrir jogo")
+                    Text("• B / Back: voltar")
+                    Spacer(Modifier.height(8.dp))
+                    Text("⭐ Favoritos:", fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text("• Pressione e segure (long press) em um jogo para favoritar/desfavoritar")
+                    Spacer(Modifier.height(8.dp))
+                    Text("🔍 Pesquisa:", fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text("• Digite na barra de pesquisa para buscar jogos locais e da nuvem (R2)")
+                    Text("• B / Back no controle sai do campo de texto")
+                    Spacer(Modifier.height(8.dp))
+                    Text("☁ Jogos na nuvem:", fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text("• Ao pesquisar, jogos do R2 aparecem com ícone ☁")
+                    Text("• ☁ cinza = ainda não baixado")
+                    Text("• ☁ vermelho = já está no cache local")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showHelp = false }) {
+                    Text("OK", color = EmuHubRed)
+                }
+            },
+        )
+    }
 }
 
 @Composable
@@ -209,6 +264,8 @@ private fun GameRow(
     onOpenSystem: (String) -> Unit,
 ) {
     val container = LocalAppContainer.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     SectionTitle(title)
     LazyRow(
         contentPadding = PaddingValues(horizontal = 32.dp),
@@ -216,7 +273,25 @@ private fun GameRow(
     ) {
         items(games, key = { it.id }) { game ->
             val system = container.catalog.systemById(game.systemId)
-            FocusableCard(onClick = { onOpenSystem(game.systemId) }) {
+            FocusableCard(onClick = {
+                // Tenta abrir direto. Se falhar (emulador externo ausente),
+                // cai no fallback abrindo a lista do sistema.
+                val nativeLaunched = container.gameLauncher.tryLaunchNative(game)
+                if (!nativeLaunched) {
+                    scope.launch {
+                        when (val result = container.gameLauncher.launch(game)) {
+                            is LaunchResult.Launched -> { /* ok */ }
+                            is LaunchResult.NeedsInstallApk -> {
+                                val ok = container.emulatorInstaller.openInstaller(
+                                    result.apkFile, context
+                                )
+                                if (!ok) onOpenSystem(game.systemId)
+                            }
+                            else -> onOpenSystem(game.systemId)
+                        }
+                    }
+                }
+            }) {
                 Column(modifier = Modifier.width(110.dp)) {
                     BoxArt(
                         title = game.displayName,

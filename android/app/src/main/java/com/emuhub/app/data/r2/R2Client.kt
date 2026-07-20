@@ -87,7 +87,10 @@ class R2Client(private val config: R2Config) {
             }
             val body = response.body ?: throw IOException("R2 download sem corpo ($key)")
             val total = body.contentLength()
-            dest.parentFile?.mkdirs()
+            val parent = dest.parentFile
+            if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                throw IOException("R2 download falhou ($key): não foi possível criar diretório ${parent.absolutePath}")
+            }
 
             var written = 0L
             body.byteStream().use { input ->

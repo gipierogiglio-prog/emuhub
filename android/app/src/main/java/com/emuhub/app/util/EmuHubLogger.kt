@@ -3,6 +3,7 @@ package com.emuhub.app.util
 import android.os.Build
 import android.util.Log
 import com.emuhub.app.data.r2.R2Client
+import com.emuhub.app.util.GrafanaLogger
 import java.io.File
 import java.io.FileWriter
 import java.text.SimpleDateFormat
@@ -122,7 +123,7 @@ object EmuHubLogger {
         }
     }
 
-    /** Escrita síncrona com FileWriter + flush */
+    /** Escrita síncrona com FileWriter + flush, e forward pro GrafanaLogger */
     private fun rawWrite(level: String, tag: String, msg: String) {
         if (!initialized || currentFile == null) return
         val line = "${dateFmt.format(Date())} $level/$tag: $msg\n"
@@ -133,6 +134,12 @@ object EmuHubLogger {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Erro ao escrever log: ${e.message}")
+        }
+        // Forward to Grafana (Loki) — não-bloqueante via coroutine
+        when (level) {
+            "E" -> GrafanaLogger.e(tag, msg)
+            "W" -> GrafanaLogger.w(tag, msg)
+            else -> GrafanaLogger.i(tag, msg)
         }
     }
 

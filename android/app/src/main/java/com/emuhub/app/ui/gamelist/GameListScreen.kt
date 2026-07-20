@@ -32,9 +32,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -171,6 +178,7 @@ fun GameListScreen(filter: String, onBack: () -> Unit) {
         // Campo de pesquisa
         Spacer(Modifier.height(8.dp))
         val keyboardController = LocalSoftwareKeyboardController.current
+        val focusManager = LocalFocusManager.current
         TextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
@@ -180,7 +188,17 @@ fun GameListScreen(filter: String, onBack: () -> Unit) {
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
                 // Ao focar via D-pad, abre o teclado virtual
-                .onFocusChanged { if (it.isFocused) keyboardController?.show() },
+                .onFocusChanged { if (it.isFocused) keyboardController?.show() }
+                // Botão B/Back do controle sai do campo de texto
+                .onKeyEvent { event ->
+                    if (event.type == androidx.compose.ui.input.key.KeyEventType.KeyUp &&
+                        (event.key == Key.Escape || event.key == Key.Back))
+                    {
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                        true
+                    } else false
+                },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = EmuHubSurfaceHigh,
                 unfocusedContainerColor = EmuHubSurfaceHigh,

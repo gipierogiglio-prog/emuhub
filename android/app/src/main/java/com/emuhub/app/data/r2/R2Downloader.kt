@@ -22,7 +22,10 @@ class R2Downloader(
             }
 
             val temp = cache.tempFileFor(remoteKey)
-            temp.parentFile?.mkdirs()
+            val tempParent = temp.parentFile
+            if (tempParent != null && !tempParent.exists() && !tempParent.mkdirs()) {
+                throw IOException("Falha ao criar diretório de cache: ${tempParent.absolutePath}")
+            }
             try {
                 client.downloadObject(remoteKey, temp) { read, total ->
                     onProgress(if (total > 0) read.toFloat() / total else -1f)
