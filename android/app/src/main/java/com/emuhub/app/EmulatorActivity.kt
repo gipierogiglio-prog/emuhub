@@ -863,78 +863,94 @@ class EmulatorActivity : ComponentActivity() {
             post {
                 val sw = width.toFloat()
                 val sh = height.toFloat()
-                val bs = Math.min(sw, sh) * 0.16f
-                val margin = bs * 0.3f
+                val u = Math.min(sw, sh)  // base unit
+                val bs = u * 0.15f
 
                 if (isN64) {
-                    // ─── N64 layout ───
-                    val bs = Math.min(sw, sh) * 0.15f
+                    // ─── N64 LAYOUT (refeito do zero) ───
+                    //
+                    // Mupen64Plus-Next maps:
+                    //   ID 0 (JOYPAD_B) → N64 A (confirm)
+                    //   ID 8 (JOYPAD_A) → N64 B (cancel)
+                    //   ID 1 (JOYPAD_Y) → C-Up
+                    //   ID 9 (JOYPAD_X) → C-Left
+                    //   ID 10 (JOYPAD_L) → C-Down
+                    //   ID 11 (JOYPAD_R) → C-Right
+                    //   ID 2 (SELECT) → Z trigger
+                    //   ID 3 (START) → Start
+                    //
+                    // ─── Top bar: shoulder buttons ───
+                    val shoulderH = u * 0.05f
+                    // L (top-left)
+                    buttons.add(TouchButton(u * 0.06f, shoulderH / 2, u * 0.12f, shoulderH, "L", 10))
+                    // R (top-right)
+                    buttons.add(TouchButton(u * 0.94f, shoulderH / 2, u * 0.12f, shoulderH, "R", 11))
+                    // Z trigger (right side, between L and R)
+                    buttons.add(TouchButton(u * 0.80f, shoulderH / 2, u * 0.10f, shoulderH, "Z", 2))
+                    // Start (center)
+                    buttons.add(TouchButton(u * 0.50f, shoulderH / 2, u * 0.10f, shoulderH, "STA", 3))
 
-                    // Analog stick (left area, centered lower)
-                    analogRadius = bs * 1.8f
-                    analogCX = sw * 0.20f
-                    analogCY = sh * 0.60f
+                    // ─── Left side: analog + d-pad ───
+                    // Analog stick
+                    analogRadius = u * 0.09f
+                    analogCX = u * 0.18f
+                    analogCY = u * 0.60f
                     analogKnobX = analogCX
                     analogKnobY = analogCY
 
-                    // D-pad (between analog and center, for menu navigation)
-                    val dpadBs = bs * 0.5f
-                    val dpadCX = sw * 0.40f
-                    val dpadCY = sh * 0.55f
-                    val dpadOff = dpadBs * 1.4f
-                    buttons.add(TouchButton(dpadCX, dpadCY - dpadOff, dpadBs, dpadBs, "▲", 4)) // UP
-                    buttons.add(TouchButton(dpadCX, dpadCY + dpadOff, dpadBs, dpadBs, "▼", 5)) // DOWN
-                    buttons.add(TouchButton(dpadCX - dpadOff, dpadCY, dpadBs, dpadBs, "◀", 6)) // LEFT
-                    buttons.add(TouchButton(dpadCX + dpadOff, dpadCY, dpadBs, dpadBs, "▶", 7)) // RIGHT
+                    // D-pad (small, below analog — essential for menu navigation)
+                    val dBs = u * 0.045f
+                    val dCx = u * 0.18f
+                    val dCy = u * 0.80f
+                    val dOff = dBs * 1.6f
+                    buttons.add(TouchButton(dCx, dCy - dOff, dBs, dBs, "▲", 4))
+                    buttons.add(TouchButton(dCx, dCy + dOff, dBs, dBs, "▼", 5))
+                    buttons.add(TouchButton(dCx - dOff, dCy, dBs, dBs, "◀", 6))
+                    buttons.add(TouchButton(dCx + dOff, dCy, dBs, dBs, "▶", 7))
 
-                    // Action diamond (right side)
-                    // A=ID 0 (JOYPAD_B=N64 A) → right
-                    // B=ID 8 (JOYPAD_A=N64 B) → bottom
-                    val actionX = sw * 0.70f
-                    val actionY = sh * 0.55f
-                    val actionOff = bs * 1.3f
+                    // ─── Right side: A + B + C ───
+                    // A (confirm) — big, prominent, right area
+                    val aS = u * 0.09f
+                    buttons.add(TouchButton(u * 0.80f, u * 0.68f, aS, aS, "A", 0))  // ID 0 = JOYPAD_B = N64 A
 
-                    buttons.add(TouchButton(actionX + actionOff, actionY + actionOff, bs, bs, "B", 8))   // B (N64 B) bottom
-                    buttons.add(TouchButton(actionX + actionOff * 2, actionY, bs, bs, "A", 0))          // A (N64 A) right
-                    buttons.add(TouchButton(actionX, actionY, bs, bs, "←", 9))                          // C-Left
-                    buttons.add(TouchButton(actionX + actionOff, actionY - actionOff, bs, bs, "↑", 1))  // C-Up
+                    // B (cancel) — below A
+                    val bS = u * 0.06f
+                    buttons.add(TouchButton(u * 0.68f, u * 0.74f, bS, bS, "B", 8))  // ID 8 = JOYPAD_A = N64 B
 
-                    // C-Down / C-Right on shoulders
-                    buttons.add(TouchButton(sw * 0.08f, sh * 0.12f, bs * 0.7f, bs * 0.4f, "↓", 10))   // C-Down (L)
-                    buttons.add(TouchButton(sw * 0.92f, sh * 0.12f, bs * 0.7f, bs * 0.4f, "→", 11))   // C-Right (R)
-
-                    // Z (left) and Start (right) on top
-                    buttons.add(TouchButton(sw * 0.38f, sh * 0.08f, bs * 0.7f, bs * 0.5f, "Z", 2))
-                    buttons.add(TouchButton(sw * 0.62f, sh * 0.08f, bs * 0.7f, bs * 0.5f, "STA", 3))
+                    // C-buttons — small diamond above A
+                    val cS = u * 0.04f
+                    val cCx = u * 0.80f
+                    val cCy = u * 0.50f
+                    val cOff = cS * 1.8f
+                    buttons.add(TouchButton(cCx, cCy - cOff, cS, cS, "↑", 1))   // C-Up
+                    buttons.add(TouchButton(cCx + cOff, cCy, cS, cS, "→", 11))  // C-Right
+                    buttons.add(TouchButton(cCx, cCy + cOff, cS, cS, "↓", 10))  // C-Down
+                    buttons.add(TouchButton(cCx - cOff, cCy, cS, cS, "←", 9))   // C-Left
 
                 } else {
                     // ─── Standard layout (SNES/Genesis etc) ───
-                    // D-pad (left side)
                     val dpadCenterX = bs * 2.2f
                     val dpadCenterY = sh - bs * 2.3f
                     val dpadOffset = bs * 1.3f
 
-                    buttons.add(TouchButton(dpadCenterX, dpadCenterY - dpadOffset, bs, bs, "↑", 4)) // UP
-                    buttons.add(TouchButton(dpadCenterX, dpadCenterY + dpadOffset, bs, bs, "↓", 5)) // DOWN
-                    buttons.add(TouchButton(dpadCenterX - dpadOffset, dpadCenterY, bs, bs, "←", 6)) // LEFT
-                    buttons.add(TouchButton(dpadCenterX + dpadOffset, dpadCenterY, bs, bs, "→", 7)) // RIGHT
+                    buttons.add(TouchButton(dpadCenterX, dpadCenterY - dpadOffset, bs, bs, "↑", 4))
+                    buttons.add(TouchButton(dpadCenterX, dpadCenterY + dpadOffset, bs, bs, "↓", 5))
+                    buttons.add(TouchButton(dpadCenterX - dpadOffset, dpadCenterY, bs, bs, "←", 6))
+                    buttons.add(TouchButton(dpadCenterX + dpadOffset, dpadCenterY, bs, bs, "→", 7))
 
-                    // Action buttons (right side)
                     val actionX = sw - bs * 3.2f
                     val actionY = sh - bs * 2.3f
                     val actionOffset = bs * 1.3f
 
-                    buttons.add(TouchButton(actionX + actionOffset, actionY + actionOffset, bs, bs, "B", 0)) // B
-                    buttons.add(TouchButton(actionX + actionOffset * 2, actionY, bs, bs, "A", 8)) // A
-                    buttons.add(TouchButton(actionX, actionY, bs, bs, "Y", 1)) // Y
-                    buttons.add(TouchButton(actionX + actionOffset, actionY - actionOffset, bs, bs, "X", 9)) // X
+                    buttons.add(TouchButton(actionX + actionOffset, actionY + actionOffset, bs, bs, "B", 0))
+                    buttons.add(TouchButton(actionX + actionOffset * 2, actionY, bs, bs, "A", 8))
+                    buttons.add(TouchButton(actionX, actionY, bs, bs, "Y", 1))
+                    buttons.add(TouchButton(actionX + actionOffset, actionY - actionOffset, bs, bs, "X", 9))
 
-                    // Start/Select
                     val centerX = sw / 2
                     buttons.add(TouchButton(centerX - bs, bs, bs * 0.7f, bs * 0.5f, "SEL", 2))
                     buttons.add(TouchButton(centerX + bs, bs, bs * 0.7f, bs * 0.5f, "STA", 3))
 
-                    // L/R
                     buttons.add(TouchButton(bs, bs * 0.3f, bs, bs * 0.5f, "L", 10))
                     buttons.add(TouchButton(sw - bs, bs * 0.3f, bs, bs * 0.5f, "R", 11))
                 }
