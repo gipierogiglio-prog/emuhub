@@ -64,6 +64,9 @@ class EmulatorActivity : ComponentActivity() {
     private var showSavePanel = false
     private val saveSlots = 5  // 5 save slots (1-5) + auto-save (slot 0)
 
+    // ─── N64 mode: layout diferente dos botões ───
+    private var isN64 = false
+
     // ─── Gamepad físico ───
     private var inputManager: InputManager? = null
     private var autoHideTouchOverlay = true
@@ -95,6 +98,7 @@ class EmulatorActivity : ComponentActivity() {
     private external fun nativeGetFBHeight(): Int
     private external fun nativeGetFrameBuffer(buf: IntArray): Boolean
     private external fun nativeSetButton(id: Int, pressed: Boolean)
+    private external fun nativeSetAnalog(index: Int, axis: Int, value: Int)
     private external fun nativeReset()
     private external fun nativeUnload()
     private external fun nativeGetFPS(): Double
@@ -225,6 +229,9 @@ class EmulatorActivity : ComponentActivity() {
         } else {
             nativeSetLayoutMode(0)
         }
+
+        // N64: botões A/B trocados no libretro, precisa de analógico virtual
+        isN64 = coreLower.contains("mupen64")
 
         // Setup GL surface — retro_run() roda dentro de onDrawFrame() (GL
         // thread), pois cores com HW render (Panda3DS/Citra GL) chamam gl*()
@@ -841,43 +848,84 @@ class EmulatorActivity : ComponentActivity() {
             textAlign = Paint.Align.CENTER
         }
 
+        // ─── Analog stick state ───
+        private var analogTouchId = -1
+        private var analogBaseX = 0f
+        private var analogBaseY = 0f
+        private var analogCX = 0f
+        private var analogCY = 0f
+        private var analogRadius = 0f
+        private var analogKnobX = 0f
+        private var analogKnobY = 0f
+        private val ANALOG_DEADZONE = 0.15f
+
         init {
-            // Layout buttons based on screen size
             post {
                 val sw = width.toFloat()
                 val sh = height.toFloat()
-                val bs = Math.min(sw, sh) * 0.16f  // button size (aumentado)
+                val bs = Math.min(sw, sh) * 0.16f
                 val margin = bs * 0.3f
 
-                // D-pad (left side) — mais afastado do centro
-                val dpadCenterX = bs * 2.2f
-                val dpadCenterY = sh - bs * 2.3f
-                val dpadOffset = bs * 1.3f  // mais espaçado
+                if (isN64) {
+                    // ─── N64 layout: analógico à esquerda ───
+                    analogRadius = bs * 1.8f
+                    analogCX = analogRadius * 2f
+                    analogCY = sh - analogRadius * 2.5f
+                    analogKnobX = analogCX
+                    analogKnobY = analogCY
 
-                // IDs = RETRO_DEVICE_ID_JOYPAD_* do libretro.h
-                buttons.add(TouchButton(dpadCenterX, dpadCenterY - dpadOffset, bs, bs, "↑", 4)) // UP
-                buttons.add(TouchButton(dpadCenterX, dpadCenterY + dpadOffset, bs, bs, "↓", 5)) // DOWN
-                buttons.add(TouchButton(dpadCenterX - dpadOffset, dpadCenterY, bs, bs, "←", 6)) // LEFT
-                buttons.add(TouchButton(dpadCenterX + dpadOffset, dpadCenterY, bs, bs, "→", 7)) // RIGHT
+                    // Action buttons (right side) — N64: A (embaixo), B (direita)
+                    val actionX = sw - bs * 3.2f
+                    val actionY = sh - bs * 2.3f
+                    val actionOffset = bs * 1.3f
 
-                // Action buttons (right side) — mais afastados
-                val actionX = sw - bs * 3.2f  // mais pra esquerda
-                val actionY = sh - bs * 2.3f
-                val actionOffset = bs * 1.3f  // mais espaçado
+                    // A=ID 8 (JOYPAD_A=N64 B), B=ID 0 (JOYPAD_B=N64 A)
+                    // ── swap: botão B (embaixo) manda JOYPAD_A → N64 B
+                    // ──        botão A (direita) manda JOYPAD_B → N64 A
+                    buttons.add(TouchButton(actionX + actionOffset, actionY + actionOffset, bs, bs, "B", 8))  // N64 B
+                    buttons.add(TouchButton(actionX + actionOffset * 2, actionY, bs, bs, "A", 0))              // N64 A
+                    // C-buttons: Y(1)=C↑, X(9)=C←, L(10)=C↓, R(11)=C→
+                    buttons.add(TouchButton(actionX, actionY, bs, bs, "C←", 9))   // C-Left
+                    buttons.add(TouchButton(actionX + actionOffset, actionY - actionOffset, bs, bs, "C↑", 1))  // C-Up
+                    buttons.add(TouchButton(bs, bs * 0.3f, bs, bs * 0.5f, "C↓", 10))   // C-Down (L)
+                    buttons.add(TouchButton(sw - bs, bs * 0.3f, bs, bs * 0.5f, "C→", 11))  // C-Right (R)
 
-                buttons.add(TouchButton(actionX + actionOffset, actionY + actionOffset, bs, bs, "B", 0)) // B (baixo)
-                buttons.add(TouchButton(actionX + actionOffset * 2, actionY, bs, bs, "A", 8)) // A (direita)
-                buttons.add(TouchButton(actionX, actionY, bs, bs, "Y", 1)) // Y (esquerda)
-                buttons.add(TouchButton(actionX + actionOffset, actionY - actionOffset, bs, bs, "X", 9)) // X (cima)
+                    // Start/Z
+                    val centerX = sw / 2
+                    buttons.add(TouchButton(centerX - bs, bs, bs * 0.7f, bs * 0.5f, "Z", 2))     // Z = SELECT
+                    buttons.add(TouchButton(centerX + bs, bs, bs * 0.7f, bs * 0.5f, "STA", 3))   // START
 
-                // Start/Select
-                val centerX = sw / 2
-                buttons.add(TouchButton(centerX - bs, bs, bs * 0.7f, bs * 0.5f, "SEL", 2)) // SELECT
-                buttons.add(TouchButton(centerX + bs, bs, bs * 0.7f, bs * 0.5f, "STA", 3)) // START
+                } else {
+                    // ─── Standard layout (SNES/Genesis etc) ───
+                    // D-pad (left side)
+                    val dpadCenterX = bs * 2.2f
+                    val dpadCenterY = sh - bs * 2.3f
+                    val dpadOffset = bs * 1.3f
 
-                // L/R
-                buttons.add(TouchButton(bs, bs * 0.3f, bs, bs * 0.5f, "L", 10))
-                buttons.add(TouchButton(sw - bs, bs * 0.3f, bs, bs * 0.5f, "R", 11))
+                    buttons.add(TouchButton(dpadCenterX, dpadCenterY - dpadOffset, bs, bs, "↑", 4)) // UP
+                    buttons.add(TouchButton(dpadCenterX, dpadCenterY + dpadOffset, bs, bs, "↓", 5)) // DOWN
+                    buttons.add(TouchButton(dpadCenterX - dpadOffset, dpadCenterY, bs, bs, "←", 6)) // LEFT
+                    buttons.add(TouchButton(dpadCenterX + dpadOffset, dpadCenterY, bs, bs, "→", 7)) // RIGHT
+
+                    // Action buttons (right side)
+                    val actionX = sw - bs * 3.2f
+                    val actionY = sh - bs * 2.3f
+                    val actionOffset = bs * 1.3f
+
+                    buttons.add(TouchButton(actionX + actionOffset, actionY + actionOffset, bs, bs, "B", 0)) // B
+                    buttons.add(TouchButton(actionX + actionOffset * 2, actionY, bs, bs, "A", 8)) // A
+                    buttons.add(TouchButton(actionX, actionY, bs, bs, "Y", 1)) // Y
+                    buttons.add(TouchButton(actionX + actionOffset, actionY - actionOffset, bs, bs, "X", 9)) // X
+
+                    // Start/Select
+                    val centerX = sw / 2
+                    buttons.add(TouchButton(centerX - bs, bs, bs * 0.7f, bs * 0.5f, "SEL", 2))
+                    buttons.add(TouchButton(centerX + bs, bs, bs * 0.7f, bs * 0.5f, "STA", 3))
+
+                    // L/R
+                    buttons.add(TouchButton(bs, bs * 0.3f, bs, bs * 0.5f, "L", 10))
+                    buttons.add(TouchButton(sw - bs, bs * 0.3f, bs, bs * 0.5f, "R", 11))
+                }
 
                 invalidate()
             }
@@ -903,18 +951,70 @@ class EmulatorActivity : ComponentActivity() {
                         nativeSetButton(btn.buttonId, false)
                         nativeButtonState[btn.buttonId] = false
                     }
+                    if (isN64) {
+                        analogTouchId = -1
+                        analogKnobX = analogCX
+                        analogKnobY = analogCY
+                        nativeSetAnalog(0, 0, 0) // left X = 0
+                        nativeSetAnalog(0, 1, 0) // left Y = 0
+                    }
                 }
                 else -> {
-                    // Recalcula o estado de todos os botões a partir de todos os
-                    // ponteiros ativos (num UP, o ponteiro que subiu não conta)
                     val upIndex = when (event.actionMasked) {
                         MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> event.actionIndex
                         else -> -1
                     }
+
+                    // ─── N64: handle analog stick ───
+                    if (isN64) {
+                        if (upIndex >= 0 && upIndex == analogTouchId) {
+                            // Finger que estava no analógico saiu
+                            analogTouchId = -1
+                            analogKnobX = analogCX
+                            analogKnobY = analogCY
+                            nativeSetAnalog(0, 0, 0)
+                            nativeSetAnalog(0, 1, 0)
+                        }
+                        for (i in 0 until event.pointerCount) {
+                            if (i == upIndex) continue
+                            val x = event.getX(i)
+                            val y = event.getY(i)
+                            val dx = x - analogCX
+                            val dy = y - analogCY
+                            val dist = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+                            if (analogTouchId < 0 && dist < analogRadius) {
+                                // Novo toque no analógico
+                                analogTouchId = i
+                                analogBaseX = x
+                                analogBaseY = y
+                            }
+                            if (i == analogTouchId) {
+                                val maxDist = analogRadius * 0.7f
+                                var normDx = dx
+                                var normDy = dy
+                                val d = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+                                if (d > maxDist) {
+                                    normDx = dx / d * maxDist
+                                    normDy = dy / d * maxDist
+                                }
+                                analogKnobX = analogCX + normDx
+                                analogKnobY = analogCY + normDy
+                                val rawX = normDx / maxDist
+                                val rawY = -normDy / maxDist  // invert Y (N64 up = -Y)
+                                val ax = clampAnalog(rawX)
+                                val ay = clampAnalog(rawY)
+                                nativeSetAnalog(0, 0, ax)
+                                nativeSetAnalog(0, 1, ay)
+                            }
+                        }
+                    }
+
+                    // ─── Handle buttons ───
                     for (btn in buttons) {
                         var nowPressed = false
                         for (i in 0 until event.pointerCount) {
                             if (i == upIndex) continue
+                            if (isN64 && i == analogTouchId) continue // skip analog finger
                             if (btn.contains(event.getX(i), event.getY(i))) {
                                 nowPressed = true
                                 break
@@ -934,6 +1034,12 @@ class EmulatorActivity : ComponentActivity() {
             invalidate()
         }
 
+        private fun clampAnalog(v: Float): Int {
+            if (Math.abs(v) < ANALOG_DEADZONE) return 0
+            val clamped = v.coerceIn(-1f, 1f)
+            return (clamped * 32767).toInt().coerceIn(-32767, 32767)
+        }
+
         // Track button state for ACTION_MOVE
         private val nativeButtonState = mutableMapOf<Int, Boolean>()
 
@@ -951,6 +1057,40 @@ class EmulatorActivity : ComponentActivity() {
         override fun onDraw(canvas: Canvas) {
             super.onDraw(canvas)
 
+            // ─── N64: draw analog stick ───
+            if (isN64 && analogRadius > 0f) {
+                // Outer ring
+                paint.style = Paint.Style.STROKE
+                paint.color = 0x60FFFFFF.toInt()
+                paint.strokeWidth = 3f
+                canvas.drawCircle(analogCX, analogCY, analogRadius, paint)
+
+                // Inner deadzone indicator
+                paint.style = Paint.Style.STROKE
+                paint.color = 0x30FFFFFF.toInt()
+                paint.strokeWidth = 1f
+                canvas.drawCircle(analogCX, analogCY, analogRadius * 0.15f, paint)
+
+                // Knob
+                val knobRadius = analogRadius * 0.35f
+                val isTouching = analogTouchId >= 0
+                paint.style = Paint.Style.FILL
+                paint.color = if (isTouching) 0x80FFFFFF.toInt() else 0x40000000.toInt()
+                canvas.drawCircle(analogKnobX, analogKnobY, knobRadius, paint)
+                paint.style = Paint.Style.STROKE
+                paint.color = 0x80FFFFFF.toInt()
+                paint.strokeWidth = 2f
+                canvas.drawCircle(analogKnobX, analogKnobY, knobRadius, paint)
+
+                // Label
+                paint.style = Paint.Style.FILL
+                paint.color = 0x80FFFFFF.toInt()
+                paint.textSize = 24f
+                canvas.drawText("⏚", analogCX, analogCY + paint.textSize / 3, paint)
+                paint.textSize = 36f
+            }
+
+            // ─── Draw buttons ───
             for (btn in buttons) {
                 val pressed = nativeButtonState[btn.buttonId] ?: false
                 paint.style = Paint.Style.FILL

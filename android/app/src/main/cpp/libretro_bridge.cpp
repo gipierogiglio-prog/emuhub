@@ -42,7 +42,10 @@ static void emuhub_log(int prio, const char *fmt, ...)
 // We forward-declare only what we need from the API
 
 #define RETRO_DEVICE_JOYPAD 1
+#define RETRO_DEVICE_ANALOG 5
 // IDs oficiais do libretro.h — Java envia esses mesmos valores
+#define RETRO_DEVICE_ID_ANALOG_X 0
+#define RETRO_DEVICE_ID_ANALOG_Y 1
 #define RETRO_DEVICE_ID_JOYPAD_B       0
 #define RETRO_DEVICE_ID_JOYPAD_Y       1
 #define RETRO_DEVICE_ID_JOYPAD_SELECT  2
@@ -634,6 +637,8 @@ static std::vector<int16_t> audio_buffer;
 
 // Input state: 16 buttons for port 0, all false initially
 static bool input_state[16] = {false};
+// Analog sticks: [index][axis] — index 0=left, 1=right; axis 0=X, 1=Y
+static int16_t input_analog[2][2] = {{0, 0}, {0, 0}};
 
 // Audio player buffer
 static const int AUDIO_BUF_SAMPLES = 4096;
@@ -939,8 +944,13 @@ static int input_poll_cb(void) {
 }
 
 static int16_t input_state_cb(unsigned port, unsigned device, unsigned index, unsigned id) {
-    if (port == 0 && device == RETRO_DEVICE_JOYPAD && id < 16) {
-        return input_state[id] ? 1 : 0;
+    if (port == 0) {
+        if (device == RETRO_DEVICE_JOYPAD && id < 16) {
+            return input_state[id] ? 1 : 0;
+        }
+        if (device == RETRO_DEVICE_ANALOG && index < 2 && id < 2) {
+            return input_analog[index][id];
+        }
     }
     return 0;
 }
@@ -1274,6 +1284,14 @@ Java_com_emuhub_app_EmulatorActivity_nativeSetButton(JNIEnv *env, jobject thiz,
     jint id, jboolean pressed) {
     if (id >= 0 && id < 16) {
         input_state[id] = pressed;
+    }
+}
+
+JNIEXPORT void JNICALL
+Java_com_emuhub_app_EmulatorActivity_nativeSetAnalog(JNIEnv *env, jobject thiz,
+    jint index, jint axis, jint value) {
+    if (index >= 0 && index < 2 && axis >= 0 && axis < 2) {
+        input_analog[index][axis] = static_cast<int16_t>(value);
     }
 }
 
