@@ -867,65 +867,52 @@ class EmulatorActivity : ComponentActivity() {
                 val bs = u * 0.15f
 
                 if (isN64) {
-                    // ─── N64 LAYOUT (refeito do zero) ───
+                    // ─── N64 LAYOUT — só o essencial pro Majora's Mask ───
                     //
                     // Mupen64Plus-Next maps:
-                    //   ID 0 (JOYPAD_B) → N64 A (confirm)
-                    //   ID 8 (JOYPAD_A) → N64 B (cancel)
-                    //   ID 1 (JOYPAD_Y) → C-Up
-                    //   ID 9 (JOYPAD_X) → C-Left
-                    //   ID 10 (JOYPAD_L) → C-Down
-                    //   ID 11 (JOYPAD_R) → C-Right
-                    //   ID 2 (SELECT) → Z trigger
-                    //   ID 3 (START) → Start
+                    //   ID 0 (JOYPAD_B) → N64 A (confirm/ação)
+                    //   ID 8 (JOYPAD_A) → N64 B (espada/cancel)
+                    //   ID 1 (JOYPAD_Y) → C-Up (item 1)
+                    //   ID 9 (JOYPAD_X) → C-Left (item 2)
+                    //   ID 11 (JOYPAD_R) → C-Right (item 3)
+                    //   ID 10 (JOYPAD_L) → C-Down (ocarina!)
+                    //   ID 2 (SELECT) → Z trigger (lock-on)
+                    //   ID 3 (START) → Start (pausa)
                     //
-                    // ─── Top bar: shoulder buttons ───
-                    val shoulderH = u * 0.05f
-                    // L (top-left)
-                    buttons.add(TouchButton(u * 0.06f, shoulderH / 2, u * 0.12f, shoulderH, "L", 10))
-                    // R (top-right)
-                    buttons.add(TouchButton(u * 0.94f, shoulderH / 2, u * 0.12f, shoulderH, "R", 11))
-                    // Z trigger (right side, between L and R)
-                    buttons.add(TouchButton(u * 0.80f, shoulderH / 2, u * 0.10f, shoulderH, "Z", 2))
+                    // Nada de D-Pad, nada de L/R — só o que o jogo usa.
+
+                    // ─── Top bar ───
+                    val shoulderH = u * 0.045f
                     // Start (center)
                     buttons.add(TouchButton(u * 0.50f, shoulderH / 2, u * 0.10f, shoulderH, "STA", 3))
+                    // Z (right side) — lock-on é essencial pro combate
+                    buttons.add(TouchButton(u * 0.82f, shoulderH / 2, u * 0.08f, shoulderH, "Z", 2))
 
-                    // ─── Left side: analog + d-pad ───
-                    // Analog stick
-                    analogRadius = u * 0.09f
-                    analogCX = u * 0.18f
+                    // ─── Left side: só o analógico (grande, central) ───
+                    analogRadius = u * 0.10f
+                    analogCX = u * 0.20f
                     analogCY = u * 0.60f
                     analogKnobX = analogCX
                     analogKnobY = analogCY
 
-                    // D-pad (small, below analog — essential for menu navigation)
-                    val dBs = u * 0.045f
-                    val dCx = u * 0.18f
-                    val dCy = u * 0.80f
-                    val dOff = dBs * 1.6f
-                    buttons.add(TouchButton(dCx, dCy - dOff, dBs, dBs, "▲", 4))
-                    buttons.add(TouchButton(dCx, dCy + dOff, dBs, dBs, "▼", 5))
-                    buttons.add(TouchButton(dCx - dOff, dCy, dBs, dBs, "◀", 6))
-                    buttons.add(TouchButton(dCx + dOff, dCy, dBs, dBs, "▶", 7))
+                    // ─── Right side: A + B + C diamond ───
+                    // A (ação) — GIGANTE, posição mais confortável pra pressionar
+                    val aS = u * 0.10f
+                    buttons.add(TouchButton(u * 0.80f, u * 0.70f, aS, aS, "A", 0))  // ID 0 = N64 A
 
-                    // ─── Right side: A + B + C ───
-                    // A (confirm) — big, prominent, right area
-                    val aS = u * 0.09f
-                    buttons.add(TouchButton(u * 0.80f, u * 0.68f, aS, aS, "A", 0))  // ID 0 = JOYPAD_B = N64 A
+                    // B (espada) — médio, logo abaixo do A
+                    val bS = u * 0.065f
+                    buttons.add(TouchButton(u * 0.67f, u * 0.75f, bS, bS, "B", 8))  // ID 8 = N64 B
 
-                    // B (cancel) — below A
-                    val bS = u * 0.06f
-                    buttons.add(TouchButton(u * 0.68f, u * 0.74f, bS, bS, "B", 8))  // ID 8 = JOYPAD_A = N64 B
-
-                    // C-buttons — small diamond above A
-                    val cS = u * 0.04f
+                    // C-buttons — diamante pequeno acima do A
+                    val cS = u * 0.045f
                     val cCx = u * 0.80f
-                    val cCy = u * 0.50f
-                    val cOff = cS * 1.8f
-                    buttons.add(TouchButton(cCx, cCy - cOff, cS, cS, "↑", 1))   // C-Up
-                    buttons.add(TouchButton(cCx + cOff, cCy, cS, cS, "→", 11))  // C-Right
-                    buttons.add(TouchButton(cCx, cCy + cOff, cS, cS, "↓", 10))  // C-Down
-                    buttons.add(TouchButton(cCx - cOff, cCy, cS, cS, "←", 9))   // C-Left
+                    val cCy = u * 0.48f
+                    val cOff = cS * 2.0f
+                    buttons.add(TouchButton(cCx, cCy - cOff, cS, cS, "C↑", 1))   // C-Up — item 1
+                    buttons.add(TouchButton(cCx + cOff, cCy, cS, cS, "C→", 11))  // C-Right — item 2
+                    buttons.add(TouchButton(cCx, cCy + cOff, cS, cS, "C↓", 10))  // C-Down — OCARINA!
+                    buttons.add(TouchButton(cCx - cOff, cCy, cS, cS, "C←", 9))   // C-Left — item 3
 
                 } else {
                     // ─── Standard layout (SNES/Genesis etc) ───
