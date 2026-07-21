@@ -867,33 +867,45 @@ class EmulatorActivity : ComponentActivity() {
                 val margin = bs * 0.3f
 
                 if (isN64) {
-                    // ─── N64 layout: analógico à esquerda ───
+                    // ─── N64 layout ───
+                    val bs = Math.min(sw, sh) * 0.15f
+
+                    // Analog stick (left area, centered lower)
                     analogRadius = bs * 1.8f
-                    analogCX = analogRadius * 2f
-                    analogCY = sh - analogRadius * 2.5f
+                    analogCX = sw * 0.20f
+                    analogCY = sh * 0.60f
                     analogKnobX = analogCX
                     analogKnobY = analogCY
 
-                    // Action buttons (right side) — N64: A (embaixo), B (direita)
-                    val actionX = sw - bs * 3.2f
-                    val actionY = sh - bs * 2.3f
-                    val actionOffset = bs * 1.3f
+                    // D-pad (between analog and center, for menu navigation)
+                    val dpadBs = bs * 0.5f
+                    val dpadCX = sw * 0.40f
+                    val dpadCY = sh * 0.55f
+                    val dpadOff = dpadBs * 1.4f
+                    buttons.add(TouchButton(dpadCX, dpadCY - dpadOff, dpadBs, dpadBs, "▲", 4)) // UP
+                    buttons.add(TouchButton(dpadCX, dpadCY + dpadOff, dpadBs, dpadBs, "▼", 5)) // DOWN
+                    buttons.add(TouchButton(dpadCX - dpadOff, dpadCY, dpadBs, dpadBs, "◀", 6)) // LEFT
+                    buttons.add(TouchButton(dpadCX + dpadOff, dpadCY, dpadBs, dpadBs, "▶", 7)) // RIGHT
 
-                    // A=ID 8 (JOYPAD_A=N64 B), B=ID 0 (JOYPAD_B=N64 A)
-                    // ── swap: botão B (embaixo) manda JOYPAD_A → N64 B
-                    // ──        botão A (direita) manda JOYPAD_B → N64 A
-                    buttons.add(TouchButton(actionX + actionOffset, actionY + actionOffset, bs, bs, "B", 8))  // N64 B
-                    buttons.add(TouchButton(actionX + actionOffset * 2, actionY, bs, bs, "A", 0))              // N64 A
-                    // C-buttons: Y(1)=C↑, X(9)=C←, L(10)=C↓, R(11)=C→
-                    buttons.add(TouchButton(actionX, actionY, bs, bs, "C←", 9))   // C-Left
-                    buttons.add(TouchButton(actionX + actionOffset, actionY - actionOffset, bs, bs, "C↑", 1))  // C-Up
-                    buttons.add(TouchButton(bs, bs * 0.3f, bs, bs * 0.5f, "C↓", 10))   // C-Down (L)
-                    buttons.add(TouchButton(sw - bs, bs * 0.3f, bs, bs * 0.5f, "C→", 11))  // C-Right (R)
+                    // Action diamond (right side)
+                    // A=ID 0 (JOYPAD_B=N64 A) → right
+                    // B=ID 8 (JOYPAD_A=N64 B) → bottom
+                    val actionX = sw * 0.70f
+                    val actionY = sh * 0.55f
+                    val actionOff = bs * 1.3f
 
-                    // Start/Z
-                    val centerX = sw / 2
-                    buttons.add(TouchButton(centerX - bs, bs, bs * 0.7f, bs * 0.5f, "Z", 2))     // Z = SELECT
-                    buttons.add(TouchButton(centerX + bs, bs, bs * 0.7f, bs * 0.5f, "STA", 3))   // START
+                    buttons.add(TouchButton(actionX + actionOff, actionY + actionOff, bs, bs, "B", 8))   // B (N64 B) bottom
+                    buttons.add(TouchButton(actionX + actionOff * 2, actionY, bs, bs, "A", 0))          // A (N64 A) right
+                    buttons.add(TouchButton(actionX, actionY, bs, bs, "←", 9))                          // C-Left
+                    buttons.add(TouchButton(actionX + actionOff, actionY - actionOff, bs, bs, "↑", 1))  // C-Up
+
+                    // C-Down / C-Right on shoulders
+                    buttons.add(TouchButton(sw * 0.08f, sh * 0.12f, bs * 0.7f, bs * 0.4f, "↓", 10))   // C-Down (L)
+                    buttons.add(TouchButton(sw * 0.92f, sh * 0.12f, bs * 0.7f, bs * 0.4f, "→", 11))   // C-Right (R)
+
+                    // Z (left) and Start (right) on top
+                    buttons.add(TouchButton(sw * 0.38f, sh * 0.08f, bs * 0.7f, bs * 0.5f, "Z", 2))
+                    buttons.add(TouchButton(sw * 0.62f, sh * 0.08f, bs * 0.7f, bs * 0.5f, "STA", 3))
 
                 } else {
                     // ─── Standard layout (SNES/Genesis etc) ───
