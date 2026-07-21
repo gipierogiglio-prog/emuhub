@@ -66,6 +66,11 @@ class EmulatorActivity : ComponentActivity() {
 
     // ─── N64 mode: layout diferente dos botões ───
     private var isN64 = false
+    // Estado do D-Pad gerado pelo analógico (fallback pra quando RETRO_DEVICE_ANALOG não é consultado)
+    private var analogDpadUp = false
+    private var analogDpadDown = false
+    private var analogDpadLeft = false
+    private var analogDpadRight = false
 
     // ─── Gamepad físico ───
     private var inputManager: InputManager? = null
@@ -867,52 +872,55 @@ class EmulatorActivity : ComponentActivity() {
                 val bs = u * 0.15f
 
                 if (isN64) {
-                    // ─── N64 LAYOUT — só o essencial pro Majora's Mask ───
+                    // ─── N64 LAYOUT — só o que o Majora's Mask usa ───
                     //
-                    // Mupen64Plus-Next maps:
-                    //   ID 0 (JOYPAD_B) → N64 A (confirm/ação)
-                    //   ID 8 (JOYPAD_A) → N64 B (espada/cancel)
-                    //   ID 1 (JOYPAD_Y) → C-Up (item 1)
-                    //   ID 9 (JOYPAD_X) → C-Left (item 2)
-                    //   ID 11 (JOYPAD_R) → C-Right (item 3)
-                    //   ID 10 (JOYPAD_L) → C-Down (ocarina!)
-                    //   ID 2 (SELECT) → Z trigger (lock-on)
-                    //   ID 3 (START) → Start (pausa)
+                    // NADA de D-Pad, L, R — só o essencial pra jogar.
+                    // O D-Pad no N64 é quase irrelevante pros Zeldas.
                     //
-                    // Nada de D-Pad, nada de L/R — só o que o jogo usa.
+                    // Botões (mapping Mupen64Plus-Next padrão):
+                    //   A = ID 0  (JOYPAD_B  → N64 A: ação)
+                    //   B = ID 8  (JOYPAD_A  → N64 B: item/cancel)
+                    //   C↑= ID 1  (JOYPAD_Y  → N64 C-Up)
+                    //   C←= ID 9  (JOYPAD_X  → N64 C-Left)
+                    //   C→= ID 11 (JOYPAD_R  → N64 C-Right)
+                    //   C↓= ID 10 (JOYPAD_L  → N64 C-Down)
+                    //   Z  = ID 2  (SELECT   → N64 Z: lock-on!)
+                    //   STA= ID 3  (START    → N64 Start: pausa)
 
-                    // ─── Top bar ───
-                    val shoulderH = u * 0.045f
-                    // Start (center)
-                    buttons.add(TouchButton(u * 0.50f, shoulderH / 2, u * 0.10f, shoulderH, "STA", 3))
-                    // Z (right side) — lock-on é essencial pro combate
-                    buttons.add(TouchButton(u * 0.82f, shoulderH / 2, u * 0.08f, shoulderH, "Z", 2))
+                    val unit = Math.min(sw, sh)  // base unit
 
-                    // ─── Left side: só o analógico (grande, central) ───
-                    analogRadius = u * 0.10f
-                    analogCX = u * 0.20f
-                    analogCY = u * 0.60f
+                    // ── Top bar: Start (left) + Z (right) ──
+                    val barH = unit * 0.045f
+                    buttons.add(TouchButton(sw * 0.30f, barH / 2, unit * 0.10f, barH, "STA", 3))
+                    buttons.add(TouchButton(sw * 0.70f, barH / 2, unit * 0.08f, barH, "Z", 2))
+
+                    // ── Left side: Analog stick (o MAIS importante!) ──
+                    analogRadius = unit * 0.12f
+                    analogCX = unit * 0.24f
+                    analogCY = sh * 0.55f
                     analogKnobX = analogCX
                     analogKnobY = analogCY
 
-                    // ─── Right side: A + B + C diamond ───
-                    // A (ação) — GIGANTE, posição mais confortável pra pressionar
-                    val aS = u * 0.10f
-                    buttons.add(TouchButton(u * 0.80f, u * 0.70f, aS, aS, "A", 0))  // ID 0 = N64 A
+                    // ── Right side: A + B + C diamond ──
+                    val rxC = sw * 0.72f  // center X do grupo A/B/C
+                    val ryC = sh * 0.55f  // center Y
 
-                    // B (espada) — médio, logo abaixo do A
-                    val bS = u * 0.065f
-                    buttons.add(TouchButton(u * 0.67f, u * 0.75f, bS, bS, "B", 8))  // ID 8 = N64 B
+                    // A — GIGANTE, no centro do grupo (ação principal)
+                    val aSz = unit * 0.12f
+                    buttons.add(TouchButton(rxC, ryC, aSz, aSz, "A", 0))
 
-                    // C-buttons — diamante pequeno acima do A
-                    val cS = u * 0.045f
-                    val cCx = u * 0.80f
-                    val cCy = u * 0.48f
-                    val cOff = cS * 2.0f
-                    buttons.add(TouchButton(cCx, cCy - cOff, cS, cS, "C↑", 1))   // C-Up — item 1
-                    buttons.add(TouchButton(cCx + cOff, cCy, cS, cS, "C→", 11))  // C-Right — item 2
-                    buttons.add(TouchButton(cCx, cCy + cOff, cS, cS, "C↓", 10))  // C-Down — OCARINA!
-                    buttons.add(TouchButton(cCx - cOff, cCy, cS, cS, "C←", 9))   // C-Left — item 3
+                    // B — médio, abaixo do A (espada, cancelar)
+                    val bSz = unit * 0.07f
+                    buttons.add(TouchButton(rxC, ryC + aSz * 0.7f, bSz, bSz, "B", 8))
+
+                    // C-buttons — diamante pequeno ACIMA do A
+                    val cSz = unit * 0.045f
+                    val cOff = unit * 0.055f
+                    val cCy = ryC - aSz * 0.7f
+                    buttons.add(TouchButton(rxC, cCy - cOff, cSz, cSz, "C↑", 1))
+                    buttons.add(TouchButton(rxC + cOff, cCy, cSz, cSz, "C→", 11))
+                    buttons.add(TouchButton(rxC, cCy + cOff, cSz, cSz, "C↓", 10))
+                    buttons.add(TouchButton(rxC - cOff, cCy, cSz, cSz, "C←", 9))
 
                 } else {
                     // ─── Standard layout (SNES/Genesis etc) ───
@@ -972,6 +980,14 @@ class EmulatorActivity : ComponentActivity() {
                         analogKnobY = analogCY
                         nativeSetAnalog(0, 0, 0) // left X = 0
                         nativeSetAnalog(0, 1, 0) // left Y = 0
+                        // Libera D-Pad do fallback analógico
+                        for ((id, was) in listOf(
+                            4 to analogDpadUp, 5 to analogDpadDown,
+                            6 to analogDpadLeft, 7 to analogDpadRight)) {
+                            if (was) { nativeSetButton(id, false); nativeButtonState[id] = false }
+                        }
+                        analogDpadUp = false; analogDpadDown = false
+                        analogDpadLeft = false; analogDpadRight = false
                     }
                 }
                 else -> {
@@ -989,6 +1005,14 @@ class EmulatorActivity : ComponentActivity() {
                             analogKnobY = analogCY
                             nativeSetAnalog(0, 0, 0)
                             nativeSetAnalog(0, 1, 0)
+                            // Libera D-Pad do fallback analógico
+                            for ((id, was) in listOf(
+                                4 to analogDpadUp, 5 to analogDpadDown,
+                                6 to analogDpadLeft, 7 to analogDpadRight)) {
+                                if (was) { nativeSetButton(id, false); nativeButtonState[id] = false }
+                            }
+                            analogDpadUp = false; analogDpadDown = false
+                            analogDpadLeft = false; analogDpadRight = false
                         }
                         for (i in 0 until event.pointerCount) {
                             if (i == upIndex) continue
@@ -1020,6 +1044,30 @@ class EmulatorActivity : ComponentActivity() {
                                 val ay = clampAnalog(rawY)
                                 nativeSetAnalog(0, 0, ax)
                                 nativeSetAnalog(0, 1, ay)
+
+                                // ─── Fallback: analógico → D-Pad digital ───
+                                // Manda D-Pad junto pra garantir que o jogo
+                                // responda, mesmo se o core não ler ANALOG.
+                                val digUp = ay < -16383    // empurrou pra CIMA (Y negativo)
+                                val digDown = ay > 16383   // empurrou pra BAIXO
+                                val digLeft = ax < -16383  // empurrou pra ESQUERDA
+                                val digRight = ax > 16383  // empurrou pra DIREITA
+                                if (digUp != analogDpadUp) {
+                                    nativeSetButton(4, digUp)    // UP
+                                    analogDpadUp = digUp
+                                }
+                                if (digDown != analogDpadDown) {
+                                    nativeSetButton(5, digDown)  // DOWN
+                                    analogDpadDown = digDown
+                                }
+                                if (digLeft != analogDpadLeft) {
+                                    nativeSetButton(6, digLeft)  // LEFT
+                                    analogDpadLeft = digLeft
+                                }
+                                if (digRight != analogDpadRight) {
+                                    nativeSetButton(7, digRight)  // RIGHT
+                                    analogDpadRight = digRight
+                                }
                             }
                         }
                     }
