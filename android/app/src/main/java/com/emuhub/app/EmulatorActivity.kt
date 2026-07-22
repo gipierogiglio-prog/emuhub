@@ -890,9 +890,10 @@ class EmulatorActivity : ComponentActivity() {
                     val unit = Math.min(sw, sh)  // base unit
 
                     // ── Top bar: Start (left) + Z (right) ──
-                    val barH = unit * 0.045f
-                    buttons.add(TouchButton(sw * 0.30f, unit * 0.06f, unit * 0.10f, barH, "STA", 3))
-                    buttons.add(TouchButton(sw * 0.70f, unit * 0.06f, unit * 0.08f, barH, "Z", 2))
+                    val barH = unit * 0.04f
+                    val barY = unit * 0.10f  // abaixo da status bar (~50px)
+                    buttons.add(TouchButton(sw * 0.30f, barY, unit * 0.12f, barH, "STA", 3))
+                    buttons.add(TouchButton(sw * 0.70f, barY, unit * 0.10f, barH, "Z", 2))
 
                     // ── Left side: Analog stick (BOTTOM left) ──
                     analogRadius = unit * 0.14f
@@ -913,10 +914,11 @@ class EmulatorActivity : ComponentActivity() {
                     val bSz = unit * 0.12f
                     buttons.add(TouchButton(rxC - unit * 0.18f, ryB, bSz, bSz, "B", 8))
 
-                    // C-buttons — diamante ACIMA de A+B, mais espaçado
-                    val cSz = unit * 0.055f
-                    val cOff = unit * 0.075f
-                    val cCy = ryB - aSz * 0.85f
+                    // C-buttons — diamante BEM ACIMA de A+B,
+                    // sem sobreposição com o A
+                    val cSz = unit * 0.07f
+                    val cOff = unit * 0.10f  // ↑ de 0.09
+                    val cCy = ryB - aSz * 1.5f  // ↑ de 1.0 → bem acima do A
                     buttons.add(TouchButton(rxC, cCy - cOff, cSz, cSz, "C↑", 1))
                     buttons.add(TouchButton(rxC + cOff, cCy, cSz, cSz, "C→", 11))
                     buttons.add(TouchButton(rxC, cCy + cOff, cSz, cSz, "C↓", 10))
@@ -1122,19 +1124,23 @@ class EmulatorActivity : ComponentActivity() {
 
             // ─── N64: draw analog stick ───
             if (isN64 && analogRadius > 0f) {
-                // Outer ring
-                paint.style = Paint.Style.STROKE
-                paint.color = 0xB0FFFFFF.toInt()
-                paint.strokeWidth = 4f
+                // Filled base — gray translucent so it's VISIBLE even over black
+                paint.style = Paint.Style.FILL
+                paint.color = 0x60404040.toInt()  // dark gray translucent
                 canvas.drawCircle(analogCX, analogCY, analogRadius, paint)
 
-                // Inner deadzone indicator
+                // Outer ring (bright border, thick)
                 paint.style = Paint.Style.STROKE
-                paint.color = 0x50FFFFFF.toInt()
-                paint.strokeWidth = 1f
+                paint.color = 0xE0FFFFFF.toInt()
+                paint.strokeWidth = 8f
+                canvas.drawCircle(analogCX, analogCY, analogRadius, paint)
+
+                // Inner deadzone dot
+                paint.style = Paint.Style.FILL
+                paint.color = 0x60FFFFFF.toInt()
                 canvas.drawCircle(analogCX, analogCY, analogRadius * 0.15f, paint)
 
-                // Knob
+                // Knob (visible circle that moves)
                 val knobRadius = analogRadius * 0.35f
                 val isTouching = analogTouchId >= 0
                 paint.style = Paint.Style.FILL
@@ -1156,17 +1162,20 @@ class EmulatorActivity : ComponentActivity() {
             // ─── Draw buttons ───
             for (btn in buttons) {
                 val pressed = nativeButtonState[btn.buttonId] ?: false
+                // Fill: dark gray when not pressed, white when pressed
                 paint.style = Paint.Style.FILL
-                paint.color = if (pressed) 0x80FFFFFF.toInt() else 0x40000000.toInt()
+                paint.color = if (pressed) 0x80FFFFFF.toInt() else 0x80404040.toInt()
                 canvas.drawRoundRect(btn.rect, 8f, 8f, paint)
 
+                // Border: always visible white outline
                 paint.style = Paint.Style.STROKE
-                paint.color = 0x80FFFFFF.toInt()
-                paint.strokeWidth = 2f
+                paint.color = 0xA0FFFFFF.toInt()
+                paint.strokeWidth = 3f
                 canvas.drawRoundRect(btn.rect, 8f, 8f, paint)
 
+                // Label
                 paint.style = Paint.Style.FILL
-                paint.color = 0xFFFFFFFF.toInt()
+                paint.color = if (pressed) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
                 canvas.drawText(btn.label, btn.cx, btn.cy + paint.textSize / 3, paint)
             }
         }
