@@ -872,57 +872,63 @@ class EmulatorActivity : ComponentActivity() {
                 val bs = u * 0.15f
 
                 if (isN64) {
-                    // ─── N64 LAYOUT — só o que o Majora's Mask usa ───
-                    //
-                    // NADA de D-Pad, L, R — só o essencial pra jogar.
-                    // O D-Pad no N64 é quase irrelevante pros Zeldas.
-                    //
-                    // Botões (mapping Mupen64Plus-Next padrão):
-                    //   A = ID 0  (JOYPAD_B  → N64 A: ação)
-                    //   B = ID 8  (JOYPAD_A  → N64 B: item/cancel)
-                    //   C↑= ID 1  (JOYPAD_Y  → N64 C-Up)
-                    //   C←= ID 9  (JOYPAD_X  → N64 C-Left)
-                    //   C→= ID 11 (JOYPAD_R  → N64 C-Right)
-                    //   C↓= ID 10 (JOYPAD_L  → N64 C-Down)
-                    //   Z  = ID 2  (SELECT   → N64 Z: lock-on!)
-                    //   STA= ID 3  (START    → N64 Start: pausa)
+                        // ─── N64 LAYOUT — BIG VERSION ───
+                        //
+                        // NADA de D-Pad, L, R — só o essencial pra jogar.
+                        //
+                        // Botões (mapping Mupen64Plus-Next padrão):
+                        //   A = ID 0  (JOYPAD_B  → N64 A: ação)
+                        //   B = ID 8  (JOYPAD_A  → N64 B: item/cancel)
+                        //   C↑= ID 1  (JOYPAD_Y  → N64 C-Up)
+                        //   C←= ID 9  (JOYPAD_X  → N64 C-Left)
+                        //   C→= ID 11 (JOYPAD_R  → N64 C-Right)
+                        //   C↓= ID 10 (JOYPAD_L  → N64 C-Down)
+                        //   Z  = ID 2  (SELECT   → N64 Z: lock-on!)
+                        //   STA= ID 3  (START    → N64 Start: pausa)
+                        val unit = Math.min(sw, sh)  // ~1080 na Samsung A16
 
-                    val unit = Math.min(sw, sh)  // base unit
+                        // ── Top bar: Start (left) + Z (right) ──
+                        // Mais largos e grossos pra dedo acertar fácil
+                        val barH = unit * 0.06f      // 65px altura
+                        val barY = unit * 0.07f      // 76px do topo
+                        val barW = unit * 0.18f      // 194px largura
+                        buttons.add(TouchButton(sw * 0.20f, barY, barW, barH, "STA", 3))
+                        buttons.add(TouchButton(sw * 0.80f, barY, barW, barH, "Z", 2))
 
-                    // ── Top bar: Start (left) + Z (right) ──
-                    val barH = unit * 0.04f
-                    val barY = unit * 0.10f  // abaixo da status bar (~50px)
-                    buttons.add(TouchButton(sw * 0.30f, barY, unit * 0.12f, barH, "STA", 3))
-                    buttons.add(TouchButton(sw * 0.70f, barY, unit * 0.10f, barH, "Z", 2))
+                        // ── Analog stick: ENORME, canto inferior esquerdo ──
+                        analogRadius = unit * 0.18f     // 194px raio → 388px diâmetro (~22mm)
+                        analogCX = unit * 0.18f         // 194px da borda esquerda
+                        analogCY = sh * 0.82f           // ~1968px do topo
+                        analogKnobX = analogCX
+                        analogKnobY = analogCY
 
-                    // ── Left side: Analog stick (BOTTOM left) ──
-                    analogRadius = unit * 0.14f
-                    analogCX = unit * 0.24f
-                    analogCY = sh - unit * 0.22f
-                    analogKnobX = analogCX
-                    analogKnobY = analogCY
+                        // ── A + B lado a lado, BEM ESPAÇADOS ──
+                        val rxC = sw * 0.80f           // 864px — A na extrema direita
+                        val ryB = sh * 0.82f           // mesma altura do analógico
 
-                    // ── Right side: A + B lado a lado + C diamond acima ──
-                    val rxC = sw * 0.72f  // center X do par A+B
-                    val ryB = sh - unit * 0.18f  // Y base dos botões
+                        // A — ENORME (ação principal, polegar direito natural)
+                        val aSz = unit * 0.22f         // 238px → ~13mm ✓
+                        buttons.add(TouchButton(rxC, ryB, aSz, aSz, "A", 0))
 
-                    // A — GRANDE (ação)
-                    val aSz = unit * 0.14f
-                    buttons.add(TouchButton(rxC, ryB, aSz, aSz, "A", 0))
+                        // B — GRANDE, à esquerda de A com bastante espaço
+                        val bSz = unit * 0.18f         // 194px → ~10.8mm ✓
+                        buttons.add(TouchButton(rxC - unit * 0.32f, ryB, bSz, bSz, "B", 8))
+                        // Espaçamento: borda dir B = 540-97=443, borda esq A = 864-119=745
+                        // Gap = 745-443 = 302px ← SOBRA ESPAÇO!
 
-                    // B — GRANDE também, lado a lado com A (à esquerda)
-                    val bSz = unit * 0.12f
-                    buttons.add(TouchButton(rxC - unit * 0.18f, ryB, bSz, bSz, "B", 8))
+                        // ── C diamond: BEM acima de A+B, sem sobreposição ──
+                        val cSz = unit * 0.10f         // 108px → ~6mm (C é secundário)
+                        val cOff = unit * 0.14f        // 151px entre centros do diamante
+                        val cCy = ryB - aSz * 0.65f - cOff * 1.6f  // bem acima do A
+                        // C↓ bottom = cCy + cOff + cSz/2
+                        // A top = ryB - aSz/2
+                        // Gap > 40px ✓
 
-                    // C-buttons — diamante BEM ACIMA de A+B,
-                    // sem sobreposição com o A
-                    val cSz = unit * 0.07f
-                    val cOff = unit * 0.10f  // ↑ de 0.09
-                    val cCy = ryB - aSz * 1.5f  // ↑ de 1.0 → bem acima do A
-                    buttons.add(TouchButton(rxC, cCy - cOff, cSz, cSz, "C↑", 1))
-                    buttons.add(TouchButton(rxC + cOff, cCy, cSz, cSz, "C→", 11))
-                    buttons.add(TouchButton(rxC, cCy + cOff, cSz, cSz, "C↓", 10))
-                    buttons.add(TouchButton(rxC - cOff, cCy, cSz, cSz, "C←", 9))
+                        val cCx = rxC                  // centralizado com o A
+                        buttons.add(TouchButton(cCx, cCy - cOff, cSz, cSz, "C↑", 1))
+                        buttons.add(TouchButton(cCx + cOff, cCy, cSz, cSz, "C→", 11))
+                        buttons.add(TouchButton(cCx, cCy + cOff, cSz, cSz, "C↓", 10))
+                        buttons.add(TouchButton(cCx - cOff, cCy, cSz, cSz, "C←", 9))
 
                 } else {
                     // ─── Standard layout (SNES/Genesis etc) ───
@@ -1124,31 +1130,31 @@ class EmulatorActivity : ComponentActivity() {
 
             // ─── N64: draw analog stick ───
             if (isN64 && analogRadius > 0f) {
-                // Filled base — gray translucent so it's VISIBLE even over black
+                // Filled base — visible gray even over black
                 paint.style = Paint.Style.FILL
-                paint.color = 0x60404040.toInt()  // dark gray translucent
+                paint.color = 0x80404040.toInt()  // dark gray 50%
                 canvas.drawCircle(analogCX, analogCY, analogRadius, paint)
 
-                // Outer ring (bright border, thick)
+                // Outer ring (bright white, THICK)
                 paint.style = Paint.Style.STROKE
                 paint.color = 0xE0FFFFFF.toInt()
-                paint.strokeWidth = 8f
+                paint.strokeWidth = 10f
                 canvas.drawCircle(analogCX, analogCY, analogRadius, paint)
 
                 // Inner deadzone dot
                 paint.style = Paint.Style.FILL
-                paint.color = 0x60FFFFFF.toInt()
+                paint.color = 0x80FFFFFF.toInt()
                 canvas.drawCircle(analogCX, analogCY, analogRadius * 0.15f, paint)
 
-                // Knob (visible circle that moves)
+                // Knob (moves with finger)
                 val knobRadius = analogRadius * 0.35f
                 val isTouching = analogTouchId >= 0
                 paint.style = Paint.Style.FILL
-                paint.color = if (isTouching) 0x80FFFFFF.toInt() else 0x40000000.toInt()
+                paint.color = if (isTouching) 0xA0FFFFFF.toInt() else 0x80404040.toInt()
                 canvas.drawCircle(analogKnobX, analogKnobY, knobRadius, paint)
                 paint.style = Paint.Style.STROKE
-                paint.color = 0x80FFFFFF.toInt()
-                paint.strokeWidth = 2f
+                paint.color = if (isTouching) 0xFFFFFFFF.toInt() else 0xC0FFFFFF.toInt()
+                paint.strokeWidth = 4f
                 canvas.drawCircle(analogKnobX, analogKnobY, knobRadius, paint)
 
                 // Label
@@ -1164,18 +1170,19 @@ class EmulatorActivity : ComponentActivity() {
                 val pressed = nativeButtonState[btn.buttonId] ?: false
                 // Fill: dark gray when not pressed, white when pressed
                 paint.style = Paint.Style.FILL
-                paint.color = if (pressed) 0x80FFFFFF.toInt() else 0x80404040.toInt()
-                canvas.drawRoundRect(btn.rect, 8f, 8f, paint)
+                paint.color = if (pressed) 0xC0FFFFFF.toInt() else 0x80404040.toInt()
+                canvas.drawRoundRect(btn.rect, 10f, 10f, paint)
 
-                // Border: always visible white outline
+                // Border: thick bright outline
                 paint.style = Paint.Style.STROKE
-                paint.color = 0xA0FFFFFF.toInt()
-                paint.strokeWidth = 3f
-                canvas.drawRoundRect(btn.rect, 8f, 8f, paint)
+                paint.color = 0xE0FFFFFF.toInt()
+                paint.strokeWidth = 4f
+                canvas.drawRoundRect(btn.rect, 10f, 10f, paint)
 
                 // Label
                 paint.style = Paint.Style.FILL
                 paint.color = if (pressed) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
+                paint.textSize = btn.h * 0.50f
                 canvas.drawText(btn.label, btn.cx, btn.cy + paint.textSize / 3, paint)
             }
         }
