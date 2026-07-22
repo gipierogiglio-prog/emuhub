@@ -891,8 +891,8 @@ class EmulatorActivity : ComponentActivity() {
 
                     // ── Top bar: Start (left) + Z (right) ──
                     val barH = unit * 0.045f
-                    buttons.add(TouchButton(sw * 0.30f, barH / 2, unit * 0.10f, barH, "STA", 3))
-                    buttons.add(TouchButton(sw * 0.70f, barH / 2, unit * 0.08f, barH, "Z", 2))
+                    buttons.add(TouchButton(sw * 0.30f, unit * 0.06f, unit * 0.10f, barH, "STA", 3))
+                    buttons.add(TouchButton(sw * 0.70f, unit * 0.06f, unit * 0.08f, barH, "Z", 2))
 
                     // ── Left side: Analog stick (BOTTOM left) ──
                     analogRadius = unit * 0.12f
@@ -1125,13 +1125,13 @@ class EmulatorActivity : ComponentActivity() {
             if (isN64 && analogRadius > 0f) {
                 // Outer ring
                 paint.style = Paint.Style.STROKE
-                paint.color = 0x60FFFFFF.toInt()
-                paint.strokeWidth = 3f
+                paint.color = 0xB0FFFFFF.toInt()
+                paint.strokeWidth = 4f
                 canvas.drawCircle(analogCX, analogCY, analogRadius, paint)
 
                 // Inner deadzone indicator
                 paint.style = Paint.Style.STROKE
-                paint.color = 0x30FFFFFF.toInt()
+                paint.color = 0x50FFFFFF.toInt()
                 paint.strokeWidth = 1f
                 canvas.drawCircle(analogCX, analogCY, analogRadius * 0.15f, paint)
 
