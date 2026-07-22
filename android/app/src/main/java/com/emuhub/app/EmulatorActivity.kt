@@ -894,16 +894,17 @@ class EmulatorActivity : ComponentActivity() {
                     buttons.add(TouchButton(sw * 0.30f, barH / 2, unit * 0.10f, barH, "STA", 3))
                     buttons.add(TouchButton(sw * 0.70f, barH / 2, unit * 0.08f, barH, "Z", 2))
 
-                    // ── Left side: Analog stick (o MAIS importante!) ──
+                    // ── Left side: Analog stick (BOTTOM left) ──
                     analogRadius = unit * 0.12f
-                    analogCX = unit * 0.24f
-                    analogCY = sh * 0.55f
+                    analogCX = unit * 0.22f
+                    analogCY = sh - unit * 0.25f  // perto do canto inferior
                     analogKnobX = analogCX
                     analogKnobY = analogCY
 
-                    // ── Right side: A + B + C diamond ──
+                    // ── Right side: A + B + C diamond (BOTTOM right) ──
+                    val bottomY = sh - unit * 0.20f  // base Y dos botões
                     val rxC = sw * 0.72f  // center X do grupo A/B/C
-                    val ryC = sh * 0.55f  // center Y
+                    val ryC = bottomY
 
                     // A — GIGANTE, no centro do grupo (ação principal)
                     val aSz = unit * 0.12f
@@ -911,12 +912,12 @@ class EmulatorActivity : ComponentActivity() {
 
                     // B — médio, abaixo do A (espada, cancelar)
                     val bSz = unit * 0.07f
-                    buttons.add(TouchButton(rxC, ryC + aSz * 0.7f, bSz, bSz, "B", 8))
+                    buttons.add(TouchButton(rxC, ryC + aSz * 1.0f, bSz, bSz, "B", 8))
 
                     // C-buttons — diamante pequeno ACIMA do A
                     val cSz = unit * 0.045f
                     val cOff = unit * 0.055f
-                    val cCy = ryC - aSz * 0.7f
+                    val cCy = ryC - aSz * 0.8f
                     buttons.add(TouchButton(rxC, cCy - cOff, cSz, cSz, "C↑", 1))
                     buttons.add(TouchButton(rxC + cOff, cCy, cSz, cSz, "C→", 11))
                     buttons.add(TouchButton(rxC, cCy + cOff, cSz, cSz, "C↓", 10))
